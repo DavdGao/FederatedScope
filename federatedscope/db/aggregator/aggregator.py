@@ -1,0 +1,3 @@
+
+class SQLAggregator(object):
+    pass
