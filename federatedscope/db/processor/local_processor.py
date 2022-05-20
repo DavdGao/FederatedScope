@@ -64,3 +64,4 @@ class LocalSQLProcessor(BasicSQLProcessor):
                 raise NotImplementedError("Unsupported aggregate function")
         else:
             raise ValueError("No output in query")
+
