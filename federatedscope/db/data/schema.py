@@ -15,4 +15,4 @@ class Schema(object):
         return self.attrs[self.attr_map[attr_name]]
 
     def get_attrs(self, attr_names: list):
-        return [get_attr(attr_name) for attr in attr_names]
+        return [self.get_attr(attr_name) for attr_name in attr_names]
