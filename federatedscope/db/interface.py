@@ -7,11 +7,11 @@ class Interface(object):
         # Main loop in the interface
         while True:
             cmds = input(">").strip().split(";")
-            cmds[0] = " ".join(tmp, cmds[0]).strip()
+            cmds[0] = " ".join([tmp, cmds[0]]).strip()
             tmp = cmds[-1]
             # Process the commands
             for cmd in cmds:
-                if len(cmd) == 0 or not self.check_syntax(cmd):
+                if len(cmd) == 0:
                     continue
                 yield cmd
 

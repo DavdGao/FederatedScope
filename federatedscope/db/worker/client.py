@@ -6,30 +6,48 @@ from federatedscope.db.processor.local_processor import LocalSQLProcessor
 from federatedscope.db.processor.external_processor import ExternalSQLProcessor
 from federatedscope.db.aggregator.aggregator import SQLAggregator
 from federatedscope.db.scheduler.scheduler import SQLScheduler
+from federatedscope.db.interface import Interface
+
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 class Client(Worker):
-    def __init__(self, ID, server_id, host, port, config):
+
+    def __init__(self, ID, server_id, config):
+        host = config.distribute.client_host
+        port = config.distribute.client_port
         super(Client, self).__init__(ID, host, port, config)
 
         self.server_id = server_id
 
+        self.interface = Interface()
+
         self.sql_parser = SQLParser()
         self.sql_scheduler = SQLScheduler()
         self.sql_processor_external = ExternalSQLProcessor()
-        self.sql_processor_local = LocalSQLProcessor()
+        self.sql_processor_local = LocalSQLProcessor(datadir=self._cfg.data.root)
         self.sql_aggregator = SQLAggregator()
 
         # Pass and store the query result from remote client
         # Currently only consider a single query
         self.queue_remote = Queue
 
+        self.comm_manager.add_neighbors(neighbor_id=server_id,
+                                        address={
+                                            'host': self._cfg.distribute.server_host,
+                                            'port': self._cfg.distribute.server_port
+                                        })
+
     def join_in(self):
         """
         To send 'join_in' message to the server for joining in the FL course.
         """
+        logger.info(f"Send register request to Server #{self.server_id}.")
         self.comm_manager.send(
-            Message(msg_type='join_in',
+            Message(msg_type='JOIN_IN',
                     sender=self.ID,
                     receiver=[self.server_id],
                     content=self.local_address))
@@ -41,13 +59,16 @@ class Client(Worker):
         # Join the federated network
         self.join_in()
 
-        # Start a local listener
-        p_local = Process(target=self.listen_local, args=(self,))
-        p_local.start()
-
         # Start a remote listener
-        p_remote = Process(target=self.listen_remote, args=(self,))
-        p_remote.start()
+        # p_remote = Process(target=self.listen_remote)
+        # p_remote.start()
+        self.listen_remote()
+
+        # Start a local listener
+        # TODO: create a process and share interface among local/remote process
+        # p_local = Process(target=self.listen_local)
+        # p_local.start()
+        # self.listen_local()
 
     def listen_local(self):
         for statement in self.interface.get_input():
@@ -87,8 +108,7 @@ class Client(Worker):
         # Listen for query and result
         while True:
             msg = self.comm_manager.receive()
-            if self.state <= msg.state:
-                self.msg_handlers[msg.msg_type](msg)
+            self.msg_handlers[msg.msg_type](msg)
 
             if msg.msg_type == 'finish':
                 break
@@ -132,7 +152,7 @@ class Client(Worker):
     def callback_funcs_for_update_network(self, message: Message):
         pass
 
-    def callback_funcs_for_assign_id(self, message:Message):
+    def callback_funcs_for_assign_client_id(self, message: Message):
         content = message.content
         self.ID = int(content)
         self.interface.print('Client (address {}:{}) is assigned with #{:d}.'.format(

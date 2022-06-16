@@ -12,14 +12,21 @@ import numpy as np
 
 
 class ExternalSQLProcessor(BasicSQLProcessor):
-    def __init__(self, epsilon: float, local_processor: LocalSQLProcessor):
-        self.epsilon = epsilon
-        self.g = int(round(math.exp(epsilon))) + 1
-        self.local_processor = local_processor
+    def __init__(self):
+        """
+
+        Args:
+            epsilon:
+            local_processor:
+        """
+        # TODO:
+        self.epsilon = None
+        self.g = 0 # int(round(math.exp(epsilon))) + 1
+        self.local_processor = None # local_processor
         # equivalent replacement of OLH bound
         # if < g / (e^\epsilon + g - 1) -> return a random value from [0, g - 1]
         # else -> return true value
-        self.p = float(self.g) / (math.exp(epsilon) + self.g - 1)
+        # self.p = float(self.g) / (math.exp(self.epsilon) + self.g - 1)
 
     def query(self, query: SQLQuery):
         local_result = self.local_processor.query(query)
