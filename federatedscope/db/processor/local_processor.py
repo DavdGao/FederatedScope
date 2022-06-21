@@ -1,42 +1,39 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
 from federatedscope.db.model.sqlquery import SQLQuery, Filter, Aggregate
+from federatedscope.db.model.sqlschedule_pb2 import AttributeType
 from federatedscope.db.data.schema import Attribute, Schema
 from federatedscope.db.data.data import Data
 
+
 import pandas as pd
+import numpy as np
 import os
 
 
 class LocalSQLProcessor(BasicSQLProcessor):
-    # read all csv files in datadir, and use file name as table name
-    def __init__(self, datadir: str):
+    def __init__(self):
         self.tables = {}
         self.schemas = {}
-        datafiles = os.listdir(datadir)
-        for file in datafiles:
-            if file.endswith('.csv'):
-                table_name = os.path.splitext(file)[0]
-                df = pd.read_csv(os.path.join(datadir, file))
-                self.tables[table_name] = df
-                print("load table " + file + "with columns:")
-                print(df.columns)
-                self.schemas[table_name] = self.__convert_schema(
-                    df, df.columns)
+
+    def load_table(self, table_name: str, schema_str: str, table_path: str):
+        schema = Schema(schema_str)
+        df = pd.read_csv(table_path, header=0,
+                         names=schema.attr_names(), skipinitialspace=True)
+        print("load table " + table_name + " from " + table_path)
+        for attr in schema.attrs():
+            if attr.type == AttributeType.INT:
+                df[attr.name] = df[attr.name].values.astype(np.int32)
+            else:
+                df[attr.name] = [t.strip()
+                                 for t in df[attr.name].values.astype(np.str)]
+        self.tables[table_name] = df
+        self.schemas[table_name] = schema
 
     def get_table(self, table_name: str):
         return self.tables[table_name]
 
     def get_schema(self, table_name: str):
         return self.schemas[table_name]
-
-    def __convert_schema(self, df, attr_names) -> Schema:
-        attrs = []
-        if isinstance(df, pd.DataFrame):
-            for attr in zip(attr_names, df.dtypes):
-                attrs.append(Attribute(attr[0], attr[1]))
-        else:
-            attrs.append(Attribute(attr_names[0], type(df)))
-        return Schema(attrs)
 
     def __convert(self, qid, df, attrs) -> Data:
         schema = self.__convert_schema(df, attrs)
@@ -64,4 +61,3 @@ class LocalSQLProcessor(BasicSQLProcessor):
                 raise NotImplementedError("Unsupported aggregate function")
         else:
             raise ValueError("No output in query")
-

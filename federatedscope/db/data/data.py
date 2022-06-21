@@ -1,3 +1,4 @@
+
 class Data(object):
     def __init__(self, id, schema, rows):
         self.id = id
