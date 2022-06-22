@@ -3,7 +3,7 @@ import sys
 
 from yacs.config import CfgNode
 
-DEV_MODE = False  # simplify the federatedscope re-setup everytime we change the source codes of federatedscope
+DEV_MODE = True  # simplify the federatedscope re-setup everytime we change the source codes of federatedscope
 if DEV_MODE:
     file_dir = os.path.join(os.path.dirname(__file__), '..')
     sys.path.append(file_dir)

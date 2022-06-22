@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def dirichlet_distribution_noniid_slice(label, client_num, alpha, min_size=10):
+def dirichlet_distribution_noniid_slice(label, client_num, alpha, min_size=1):
     r"""Get sample index list for each client from the Dirichlet distribution.
     https://github.com/FedML-AI/FedML/blob/master/fedml_core/non_iid_partition/noniid_partition.py
 
