@@ -62,7 +62,11 @@ def init_nbafl_ctx(base_trainer):
     ctx.regularizer = get_regularizer(cfg.regularizer.type)
 
     # set noise scale during upload
-    ctx.nbafl_scale_u = cfg.nbafl.w_clip * cfg.federate.total_round_num * cfg.nbafl.constant / ctx.num_train_data / cfg.nbafl.epsilon
+    if ctx.num_train_data != 0:
+        ctx.nbafl_scale_u = cfg.nbafl.w_clip * cfg.federate.total_round_num * cfg.nbafl.constant / ctx.num_train_data / cfg.nbafl.epsilon
+    else:
+        # Without noise
+        ctx.nbafl_scale_u = 0
 
 
 # ------------------------------------------------------------------------ #
@@ -106,7 +110,7 @@ def inject_noise_in_broadcast(cfg, sample_client_num, model):
 
     # Clip weight
     for p in model.parameters():
-        p.data = p.data / torch.max(torch.ones(size=p.shape),
+        p.data = p.data / torch.max(torch.ones(size=p.shape, device=p.device),
                                     torch.abs(p.data) / cfg.nbafl.w_clip)
 
     if len(sample_client_num) > 0:

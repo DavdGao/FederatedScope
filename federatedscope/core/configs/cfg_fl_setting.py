@@ -24,6 +24,7 @@ def extend_fl_setting_cfg(cfg):
     cfg.federate.online_aggr = False
     cfg.federate.make_global_eval = False
     cfg.federate.use_diff = False
+    cfg.federate.merge_test = False
 
     # the method name is used to internally determine composition of different aggregators, messages, handlers, etc.,
     cfg.federate.method = "FedAvg"
@@ -134,5 +135,8 @@ def assert_fl_setting_cfg(cfg):
         not cfg.federate.use_ss
     ), "Have not supported to use online aggregator and secrete sharing at the same time"
 
+    if cfg.federate.merge_test and not cfg.federate.make_global_eval:
+        cfg.federate.make_global_eval = True
+        logger.warning('Set cfg.federate.make_global_eval=True since cfg.federate.merge_test=True')
 
 register_config("fl_setting", extend_fl_setting_cfg)
