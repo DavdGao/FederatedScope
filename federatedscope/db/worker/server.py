@@ -22,10 +22,11 @@ class Server(Worker):
         self.sql_scheduler = SQLScheduler()
         self.sql_aggregator = SQLAggregator()
 
+        self.data_all = None
+
     def run(self):
         while True:
             msg = self.comm_manager.receive()
-            print(msg)
             self.msg_handlers[msg.msg_type](msg)
 
             time.sleep(1)
@@ -54,3 +55,19 @@ class Server(Worker):
                     sender=self.ID,
                     receiver=[sender],
                     content=str(sender)))
+
+    def callback_funcs_for_upload_data(self, message: Message):
+        sender, data = message.sender, message.content
+
+        # Merge data: hfl for clients and join with server
+        if self.data_all is None:
+            # The first time merging
+            if self.data is None:
+                self.data_all = data
+            else:
+                # Join the data from client
+                self.data_all = self.data.join(data)
+        else:
+            # Suppose it is equal join
+            self.data_all.join(data)
+

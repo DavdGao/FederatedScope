@@ -10,6 +10,8 @@ from federatedscope.db.interface import Interface
 
 import logging
 
+from federatedscope.db.worker.handler import HANDLER
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,10 +49,26 @@ class Client(Worker):
         """
         logger.info(f"Send register request to Server #{self.server_id}.")
         self.comm_manager.send(
-            Message(msg_type='JOIN_IN',
+            Message(msg_type=HANDLER.JOIN_IN,
                     sender=self.ID,
                     receiver=[self.server_id],
                     content=self.local_address))
+
+    def upload_data(self):
+        """
+        Upload encrypted data to the server
+        """
+        logger.info(f"Send encrypted data to the server with epsilon={self.cfg.epsilon}.")
+        # TODO: LDP here
+        data = self.data
+        self.comm_manager.send(
+            Message(msg_type=HANDLER.UPLOAD_DATA,
+                    sender=self.ID,
+                    receiver=[self.server_id],
+                    # TODO: grpc data type
+                    content=data)
+        )
+
 
     def run(self):
         """
@@ -59,16 +77,20 @@ class Client(Worker):
         # Join the federated network
         self.join_in()
 
+        # Upload data if permitted
+        if self._cfg.client.upload_data:
+            self.upload_data()
+
         # Start a remote listener
         # p_remote = Process(target=self.listen_remote)
         # p_remote.start()
-        self.listen_remote()
+        # self.listen_remote()
 
         # Start a local listener
         # TODO: create a process and share interface among local/remote process
         # p_local = Process(target=self.listen_local)
         # p_local.start()
-        # self.listen_local()
+        self.listen_local()
 
     def listen_local(self):
         for statement in self.interface.get_input():
