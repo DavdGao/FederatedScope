@@ -1,5 +1,5 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
-from federatedscope.db.model.sqlschedule_pb2 import AttributeType
+from federatedscope.db.model.sqlschedule_pb2 import DataType
 from federatedscope.db.model.backup import SQLQuery, Filter, Aggregate
 from federatedscope.db.data.schema import Attribute, Schema
 from federatedscope.db.data.data import Data
@@ -20,8 +20,8 @@ class LocalSQLProcessor(BasicSQLProcessor):
         df = pd.read_csv(table_path, header=0,
                          names=schema.attr_names(), skipinitialspace=True)
         print("load table " + table_name + " from " + table_path)
-        for attr in schema.attrs():
-            if attr.type == AttributeType.INT:
+        for attr in schema.attrss():
+            if attr.type == DataType.INT:
                 df[attr.name] = df[attr.name].values.astype(np.int32)
             else:
                 df[attr.name] = [t.strip()
