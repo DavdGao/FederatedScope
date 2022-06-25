@@ -1,0 +1,42 @@
+syntax="proto3";
+
+enum DataType {
+  INT = 0;
+  FLOAT = 1;
+  STRING = 2;
+}
+
+message Cell {
+  oneof value {
+    int64 i = 1;
+    double f = 2;
+    string s = 3;
+  }
+}
+
+message Row {
+  repeated Cell cell = 1;
+}
+
+message Rows {
+  repeated Row row = 1;
+}
+
+message ColumnDesc {
+  string name = 1;
+  DataType type = 2;
+  bool has_range = 3;
+  Cell min_value = 4;
+  Cell max_value = 5;
+  Cell delta = 6;
+}
+
+message Schema {
+  repeated ColumnDesc columnDesc = 1;
+}
+
+message Table {
+  string name = 1;
+  Schema schema = 2;
+  Rows rows = 3;
+}

@@ -1,6 +1,6 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
-from federatedscope.db.model.sqlquery import SQLQuery, Filter, Aggregate
 from federatedscope.db.model.sqlschedule_pb2 import AttributeType
+from federatedscope.db.model.backup import SQLQuery, Filter, Aggregate
 from federatedscope.db.data.schema import Attribute, Schema
 from federatedscope.db.data.data import Data
 

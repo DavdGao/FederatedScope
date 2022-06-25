@@ -1,0 +1,26 @@
+syntax="proto3";
+
+enum Operator {
+  REF = 0;
+  GE = 1;
+  LE = 2;
+  COUNT = 100;
+  SUM = 101;
+}
+
+message Expression{
+  string operator = 1;
+  repeated Expression element = 2;
+  oneof value {
+    int64 i = 3;
+    string s = 4;
+  }
+}
+
+message BasicSchedule{
+  Expression exp_select = 1;
+  string table_name = 2;
+  repeated Expression exp_where = 3;
+  repeated Expression exp_agg = 4;
+  repeated BasicSchedule children = 5;
+}
