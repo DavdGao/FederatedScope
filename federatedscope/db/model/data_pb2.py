@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\ndata.proto\"6\n\x04\x43\x65ll\x12\x0b\n\x01i\x18\x01 \x01(\x03H\x00\x12\x0b\n\x01\x66\x18\x02 \x01(\x01H\x00\x12\x0b\n\x01s\x18\x03 \x01(\tH\x00\x42\x07\n\x05value\"\x1a\n\x03Row\x12\x13\n\x04\x63\x65ll\x18\x01 \x03(\x0b\x32\x05.Cell\"\x19\n\x04Rows\x12\x11\n\x03row\x18\x01 \x03(\x0b\x32\x04.Row\"\x8f\x01\n\tAttribute\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x17\n\x04type\x18\x02 \x01(\x0e\x32\t.DataType\x12\x11\n\thas_range\x18\x03 \x01(\x08\x12\x18\n\tmin_value\x18\x04 \x01(\x0b\x32\x05.Cell\x12\x18\n\tmax_value\x18\x05 \x01(\x0b\x32\x05.Cell\x12\x14\n\x05\x64\x65lta\x18\x06 \x01(\x0b\x32\x05.Cell\"\'\n\x06Schema\x12\x1d\n\tattribute\x18\x01 \x03(\x0b\x32\n.Attribute\"4\n\x04\x44\x61ta\x12\x17\n\x06schema\x18\x01 \x01(\x0b\x32\x07.Schema\x12\x13\n\x04rows\x18\x02 \x01(\x0b\x32\x05.Rows\"*\n\x05Table\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x13\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x05.Data**\n\x08\x44\x61taType\x12\x07\n\x03INT\x10\x00\x12\t\n\x05\x46LOAT\x10\x01\x12\n\n\x06STRING\x10\x02\x62\x06proto3')
+  serialized_pb=_b('\n\ndata.proto\"6\n\x04\x43\x65ll\x12\x0b\n\x01i\x18\x01 \x01(\x03H\x00\x12\x0b\n\x01\x66\x18\x02 \x01(\x01H\x00\x12\x0b\n\x01s\x18\x03 \x01(\tH\x00\x42\x07\n\x05value\"\x1b\n\x03Row\x12\x14\n\x05\x63\x65lls\x18\x01 \x03(\x0b\x32\x05.Cell\"\x1a\n\x04Rows\x12\x12\n\x04rows\x18\x01 \x03(\x0b\x32\x04.Row\"\x8f\x01\n\tAttribute\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x17\n\x04type\x18\x02 \x01(\x0e\x32\t.DataType\x12\x11\n\thas_range\x18\x03 \x01(\x08\x12\x18\n\tmin_value\x18\x04 \x01(\x0b\x32\x05.Cell\x12\x18\n\tmax_value\x18\x05 \x01(\x0b\x32\x05.Cell\x12\x14\n\x05\x64\x65lta\x18\x06 \x01(\x0b\x32\x05.Cell\"(\n\x06Schema\x12\x1e\n\nattributes\x18\x01 \x03(\x0b\x32\n.Attribute\"7\n\x07\x44\x61taSet\x12\x17\n\x06schema\x18\x01 \x01(\x0b\x32\x07.Schema\x12\x13\n\x04rows\x18\x02 \x01(\x0b\x32\x05.Rows\"-\n\x05Table\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x16\n\x04\x64\x61ta\x18\x02 \x01(\x0b\x32\x08.DataSet**\n\x08\x44\x61taType\x12\x07\n\x03INT\x10\x00\x12\t\n\x05\x46LOAT\x10\x01\x12\n\n\x06STRING\x10\x02\x62\x06proto3')
 )
 
 _DATATYPE = _descriptor.EnumDescriptor(
@@ -44,8 +44,8 @@ _DATATYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=410,
-  serialized_end=452,
+  serialized_start=419,
+  serialized_end=461,
 )
 _sym_db.RegisterEnumDescriptor(_DATATYPE)
 
@@ -112,7 +112,7 @@ _ROW = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='cell', full_name='Row.cell', index=0,
+      name='cells', full_name='Row.cells', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -131,7 +131,7 @@ _ROW = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=70,
-  serialized_end=96,
+  serialized_end=97,
 )
 
 
@@ -143,7 +143,7 @@ _ROWS = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='row', full_name='Rows.row', index=0,
+      name='rows', full_name='Rows.rows', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -161,8 +161,8 @@ _ROWS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=98,
-  serialized_end=123,
+  serialized_start=99,
+  serialized_end=125,
 )
 
 
@@ -227,8 +227,8 @@ _ATTRIBUTE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=126,
-  serialized_end=269,
+  serialized_start=128,
+  serialized_end=271,
 )
 
 
@@ -240,7 +240,7 @@ _SCHEMA = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='attribute', full_name='Schema.attribute', index=0,
+      name='attributes', full_name='Schema.attributes', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -258,27 +258,27 @@ _SCHEMA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=271,
-  serialized_end=310,
+  serialized_start=273,
+  serialized_end=313,
 )
 
 
-_DATA = _descriptor.Descriptor(
-  name='Data',
-  full_name='Data',
+_DATASET = _descriptor.Descriptor(
+  name='DataSet',
+  full_name='DataSet',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='schema', full_name='Data.schema', index=0,
+      name='schema', full_name='DataSet.schema', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='rows', full_name='Data.rows', index=1,
+      name='rows', full_name='DataSet.rows', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -296,8 +296,8 @@ _DATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=312,
-  serialized_end=364,
+  serialized_start=315,
+  serialized_end=370,
 )
 
 
@@ -334,8 +334,8 @@ _TABLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=366,
-  serialized_end=408,
+  serialized_start=372,
+  serialized_end=417,
 )
 
 _CELL.oneofs_by_name['value'].fields.append(
@@ -347,22 +347,22 @@ _CELL.fields_by_name['f'].containing_oneof = _CELL.oneofs_by_name['value']
 _CELL.oneofs_by_name['value'].fields.append(
   _CELL.fields_by_name['s'])
 _CELL.fields_by_name['s'].containing_oneof = _CELL.oneofs_by_name['value']
-_ROW.fields_by_name['cell'].message_type = _CELL
-_ROWS.fields_by_name['row'].message_type = _ROW
+_ROW.fields_by_name['cells'].message_type = _CELL
+_ROWS.fields_by_name['rows'].message_type = _ROW
 _ATTRIBUTE.fields_by_name['type'].enum_type = _DATATYPE
 _ATTRIBUTE.fields_by_name['min_value'].message_type = _CELL
 _ATTRIBUTE.fields_by_name['max_value'].message_type = _CELL
 _ATTRIBUTE.fields_by_name['delta'].message_type = _CELL
-_SCHEMA.fields_by_name['attribute'].message_type = _ATTRIBUTE
-_DATA.fields_by_name['schema'].message_type = _SCHEMA
-_DATA.fields_by_name['rows'].message_type = _ROWS
-_TABLE.fields_by_name['data'].message_type = _DATA
+_SCHEMA.fields_by_name['attributes'].message_type = _ATTRIBUTE
+_DATASET.fields_by_name['schema'].message_type = _SCHEMA
+_DATASET.fields_by_name['rows'].message_type = _ROWS
+_TABLE.fields_by_name['data'].message_type = _DATASET
 DESCRIPTOR.message_types_by_name['Cell'] = _CELL
 DESCRIPTOR.message_types_by_name['Row'] = _ROW
 DESCRIPTOR.message_types_by_name['Rows'] = _ROWS
 DESCRIPTOR.message_types_by_name['Attribute'] = _ATTRIBUTE
 DESCRIPTOR.message_types_by_name['Schema'] = _SCHEMA
-DESCRIPTOR.message_types_by_name['Data'] = _DATA
+DESCRIPTOR.message_types_by_name['DataSet'] = _DATASET
 DESCRIPTOR.message_types_by_name['Table'] = _TABLE
 DESCRIPTOR.enum_types_by_name['DataType'] = _DATATYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -402,12 +402,12 @@ Schema = _reflection.GeneratedProtocolMessageType('Schema', (_message.Message,),
   ))
 _sym_db.RegisterMessage(Schema)
 
-Data = _reflection.GeneratedProtocolMessageType('Data', (_message.Message,), dict(
-  DESCRIPTOR = _DATA,
+DataSet = _reflection.GeneratedProtocolMessageType('DataSet', (_message.Message,), dict(
+  DESCRIPTOR = _DATASET,
   __module__ = 'data_pb2'
-  # @@protoc_insertion_point(class_scope:Data)
+  # @@protoc_insertion_point(class_scope:DataSet)
   ))
-_sym_db.RegisterMessage(Data)
+_sym_db.RegisterMessage(DataSet)
 
 Table = _reflection.GeneratedProtocolMessageType('Table', (_message.Message,), dict(
   DESCRIPTOR = _TABLE,

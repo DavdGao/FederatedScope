@@ -15,11 +15,11 @@ message Cell {
 }
 
 message Row {
-  repeated Cell cell = 1;
+  repeated Cell cells = 1;
 }
 
 message Rows {
-  repeated Row row = 1;
+  repeated Row rows = 1;
 }
 
 message Attribute {
@@ -32,15 +32,15 @@ message Attribute {
 }
 
 message Schema {
-  repeated Attribute attribute = 1;
+  repeated Attribute attributes = 1;
 }
 
-message Data {
+message DataSet {
   Schema schema = 1;
   Rows rows = 2;
 }
 
 message Table {
   string name = 1;
-  Data data = 2;
+  DataSet data = 2;
 }
