@@ -30,24 +30,18 @@ class Schema(object):
 
 
 class DataSet(object):
-    def __init__(self, name, primary, schema, raw_data):
-        self.name = name
-        self.primary = primary
+    def __init__(self, schema, raw_data):
         self.schema = schema
         self.data = raw_data
 
     def schema(self):
         return self.schema
 
-    def get_row(self, row_idx: int):
-        return self.data[row_idx]
-
-    def join(self, data):
-        # TODO: more feasible
-        return self.data.join(data.set_index(self.primary), on=self.primary)
-
     def to_pb(self):
-        pass
+        return pandas_to_protocol(self.data, self.schema.to_pb())
+
+    def from_pb(datasetpb):
+        return DataSet(Schema(datasetpb.schema), protocol_to_pandas(datasetpb.schema, datasetpb.rows))
 
 
 class Table(object):
@@ -76,7 +70,8 @@ class Table(object):
         return tablepb
 
     def from_pb(tablepb):
-        pass
+        # todo: refactor primary
+        return Table(tablepb.name, False, Schema(tablepb.data.schema), protocol_to_pandas(tablepb.data.schema, tablepb.data.rows))
 
 
 def pandas_to_protocol(df, schemapb):
@@ -98,6 +93,27 @@ def pandas_to_protocol(df, schemapb):
                 cell.s = data[i]
             i = i + 1
     return dataset
+
+
+def protocol_to_pandas(schemapb, rowspb):
+    """
+    convert protocol buffuffer DataSet into pandas dataframe
+    """
+    schema = Schema(schemapb)
+    rows = []
+    for rowpb in rowspb.rows:
+        row = []
+        i = 0
+        for cellpb in rowpb.cells:
+            if schemapb.attributes[i].type == datapb.DataType.INT:
+                row.append(cellpb.i)
+            elif schemapb.attributes[i].type == datapb.DataType.FLOAT:
+                row.append(cellpb.f)
+            else:
+                row.append(cellpb.s)
+            i = i + 1
+        rows.append(row)
+    return pd.DataFrame(rows, columns=schema.names())
 
 
 def parse_attribute(attr):
