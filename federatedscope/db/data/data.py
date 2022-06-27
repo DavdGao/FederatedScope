@@ -45,9 +45,8 @@ class DataSet(object):
 
 
 class Table(object):
-    def __init__(self, name, primary, schema, raw_data):
+    def __init__(self, name, schema, raw_data):
         self.name = name
-        self.primary = primary
         self.schema = schema
         self.data = raw_data
 
@@ -59,7 +58,7 @@ class Table(object):
 
     def join(self, data):
         # TODO: more feasible
-        return self.data.join(data.set_index(self.primary), on=self.primary)
+        pass
 
     def to_pb(self):
         datasetpb = pandas_to_protocol(self.data, self.schema.to_pb())
@@ -70,8 +69,7 @@ class Table(object):
         return tablepb
 
     def from_pb(tablepb):
-        # todo: refactor primary
-        return Table(tablepb.name, False, Schema(tablepb.data.schema), protocol_to_pandas(tablepb.data.schema, tablepb.data.rows))
+        return Table(tablepb.name, Schema(tablepb.data.schema), protocol_to_pandas(tablepb.data.schema, tablepb.data.rows))
 
 
 def pandas_to_protocol(df, schemapb):
@@ -117,6 +115,21 @@ def protocol_to_pandas(schemapb, rowspb):
 
 
 def parse_attribute(attr):
+    """
+    parse attribute object into protocol buffer Attribute
+    Args:
+        attr: a dictionary describing attribute information, format:
+        {
+            'name': attribute_name,
+            'type': data_type(int|float|string),
+            'min': min_value(optional),
+            'max': max_value(optional),
+            'delta': value_interval(optional)
+        }
+
+    Returns:
+        protocol buffer Attribute
+    """
     attrpb = datapb.Attribute()
     attrpb.name = attr['name']
     if attr['type'].lower() == 'int':
@@ -145,6 +158,24 @@ def parse_attribute(attr):
 
 
 def parse_schema(schema_str):
+    """
+    parse a schema string 
+    Args:
+        schema_str (string): schema of the csv file in string, format:
+            [
+                {
+                    'name': attribute_name,
+                    'type': data_type(int|float|string),
+                    'min': min_value(optional),
+                    'max': max_value(optional),
+                    'delta': value_interval(optional)
+                },
+                ...
+            ]
+
+    Returns:
+        Wrapper of protocol buffer Schema
+    """
     schema = datapb.Schema()
     attrs = eval(schema_str.strip())
     attrpbs = []
@@ -157,10 +188,19 @@ def parse_schema(schema_str):
     schema.attributes.extend(attrpbs)
     return Schema(schema)
 
-# todo: optimize schema config format
 
 
-def load_csv(path, primary, schema_str):
+
+def load_csv(path, schema_str):
+    """
+    load a csv file 
+    Args:
+        path (string): the path to the csv file (use file name as table name)
+        schema_str (string): see parse_schema
+    Returns:
+        Table: Wrapper of protocol buffer Table
+    """
+    # todo: optimize schema config format
     schema = parse_schema(schema_str)
     df = pd.read_csv(
         path,
@@ -177,7 +217,7 @@ def load_csv(path, primary, schema_str):
             df[attr.name] = [t.strip()
                              for t in df[attr.name].values.astype(np.str)]
     name = path.split('/')[-1].replace('.csv', '')
-    return Table(name, primary, schema, df)
+    return Table(name, schema, df)
 
 
 def get_data(cfg_data):
