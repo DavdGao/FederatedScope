@@ -34,9 +34,6 @@ class DataSet(object):
         self.schema = schema
         self.data = raw_data
 
-    def schema(self):
-        return self.schema
-
     def to_pb(self):
         return pandas_to_protocol(self.data, self.schema.to_pb())
 
@@ -49,9 +46,6 @@ class Table(object):
         self.name = name
         self.schema = schema
         self.data = raw_data
-
-    def schema(self):
-        return self.schema
 
     def get_row(self, row_idx: int):
         return self.data[row_idx]
