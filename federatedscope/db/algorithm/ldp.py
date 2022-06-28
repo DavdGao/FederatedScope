@@ -37,7 +37,8 @@ class LDPOLH(object):
             report (int64): the upper 32 bits are the hash seed, and the lower 32 bits are the hash result
             key: the target value
         """
-        (h, x) = report
+        h = report >> 32
+        x = report & 0xFFFFFFFF
         if hash(key, h) == x:
             return self._fq1
         else:
