@@ -49,7 +49,7 @@ class CN(CfgNode):
         :return:
         """
         super(CN, self).merge_from_other_cfg(cfg_other)
-        self.assert_cfg()
+        # self.assert_cfg()
 
     def merge_from_list(self, cfg_list):
         """

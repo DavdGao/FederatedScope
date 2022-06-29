@@ -39,7 +39,7 @@ do
                       nbafl.w_clip ${clips[$iw]} \
                       seed $k >>${log} 2>&1
                     done
-                    python federatedscope/parse_ex_results.py --input ${log}
+                    python federatedscope/parse_exp_results.py --input ${log}
                 done
             done
         done

@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -32,6 +33,8 @@ if __name__ == '__main__':
     # load clients' cfg file
     client_cfg = CfgNode.load_cfg(open(args.client_cfg_file,
                                        'r')) if args.client_cfg_file else None
+
+    logging.info(f"Receiving client specific configs from the {args.client_cfg_file}.")
 
     # federated dataset might change the number of clients
     # thus, we allow the creation procedure of dataset to modify the global cfg object

@@ -227,8 +227,11 @@ class FedRunner(object):
             client_specific_config = self.cfg.clone()
             if self.client_cfg:
                 client_specific_config.defrost()
-                client_specific_config.merge_from_other_cfg(
-                    self.client_cfg.get('client_{}'.format(client_id)))
+                # TODO: just for now
+                if 'client_{}'.format(client_id) in self.client_cfg:
+                    client_specific_config.nbafl.__dict__['__new_allowed__'] = True
+                    client_specific_config.merge_from_other_cfg(
+                        self.client_cfg.get('client_{}'.format(client_id)))
                 client_specific_config.freeze()
             client_device = self._server_device if self.cfg.federate.share_local_model else self.gpu_manager.auto_choice(
             )

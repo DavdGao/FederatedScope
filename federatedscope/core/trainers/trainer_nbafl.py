@@ -1,3 +1,5 @@
+import logging
+
 from federatedscope.core.auxiliaries.utils import get_random
 from federatedscope.core.trainers.torch_trainer import GeneralTorchTrainer
 #from federatedscope.core.worker.server import Server
@@ -67,6 +69,7 @@ def init_nbafl_ctx(base_trainer):
     else:
         # Without noise
         ctx.nbafl_scale_u = 0
+    logging.info(f'The scale of injected noise is {ctx.nbafl_scale_u}.')
 
 
 # ------------------------------------------------------------------------ #

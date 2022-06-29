@@ -33,4 +33,4 @@ trainer:
   type: cvtrainer
 eval:
   freq: 10
-  metrics: ['acc', 'correct']
+  metrics: ['acc', 'correct', 'loss_regular']
