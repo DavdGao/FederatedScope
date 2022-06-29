@@ -22,6 +22,15 @@ class Schema(object):
     def attrs(self):
         return self.schemapb.attributes
 
+    def sensitive_attrs(self):
+        return list(filter(lambda attr : attr.sensitive, self.schemapb.attributes))
+
+    def unsensitive_attrs(self):
+        return list(filter(lambda attr : not attr.sensitive, self.schemapb.attributes))
+
+    def sensitive_attr_names(self):
+        return list(map(lambda attr : attr.name, self.sensitive_attrs()))
+
     def name(self, index):
         return self.schemapb.attributes[index]
 
@@ -53,6 +62,9 @@ class Table(object):
     def join(self, data):
         # TODO: more feasible
         pass
+
+    def project(self, attr_names):
+        return self.data[attr_names]
 
     def to_pb(self):
         datasetpb = pandas_to_protocol(self.data, self.schema.to_pb())

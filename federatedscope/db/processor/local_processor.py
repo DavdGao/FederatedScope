@@ -1,5 +1,6 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
 from federatedscope.db.algorithm.ldp import LDPOLH
+from federatedscope.db.algorithm.hdtree import LDPHDTree
 import federatedscope.db.model.sqlquery_pb2 as sqlpb
 import federatedscope.db.data.data as data
 import federatedscope.db.model.data_pb2 as datapb
@@ -28,35 +29,12 @@ class LocalSQLProcessor(BasicSQLProcessor):
     def get_schema(self, table_name: str):
         return self.schemas[table_name]
 
-    def encode_table(self, table_name: str, eps: float):
+    def encode_table(self, table_name: str, eps: float, fanout: int):
         if not self.has_table(table_name):
             raise ValueError("table " + table_name + " not exists")
         table = self.get_table(table_name)
-        olh = LDPOLH(eps)
-        encoded_table = datapb.Table()
-        encoded_table.name = table_name
-        table = self.get_table(table_name)
-        for attr in table.schema.schemapb.attributes:
-            encoded_attr = encoded_table.data.schema.attributes.add()
-            encoded_attr.CopyFrom(attr)
-            if attr.sensitive:
-                # encode into int64 olh report
-                encoded_attr.type = datapb.DataType.INT
-        for rowid, data in table.data.iterrows():
-            encoded_row = encoded_table.data.rows.rows.add()
-            i = 0
-            for attr in encoded_table.data.schema.attributes:
-                encoded_cell = encoded_row.cells.add()
-                if attr.type == datapb.DataType.INT:
-                    encoded_cell.i = data[i]
-                elif attr.type == datapb.DataType.FLOAT:
-                    encoded_cell.f = data[i]
-                else:
-                    encoded_cell.s = data[i]
-                # for sensitive value, put OLH report in int field
-                if attr.sensitive:
-                    encoded_cell.i = olh.encodes(data[i])
-                i += 1
+        hdtree = LDPHDTree(table, eps, fanout)
+        encoded_table = hdtree.encode_table()
         return encoded_table
 
 

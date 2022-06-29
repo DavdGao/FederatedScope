@@ -24,21 +24,20 @@ class LDPOLH(object):
             value: value to be encoded
 
         Returns:
-            int64: the upper 32 bits are the hash seed, and the lower 32 bits are the hash result
+            tuple(int, int): left is the random seed, right is the hash result
         """
         h = random.randint(0, self._max_seed)
         x = hash(value, h) % self._g
-        return (h << 32) | x
+        return (h, x)
 
     def decodes(self, report, key):
         """
         decode OLH report
         Args:
-            report (int64): the upper 32 bits are the hash seed, and the lower 32 bits are the hash result
+            report (tuple(int, int)): left is the random seed, right is the hash result
             key: the target value
         """
-        h = report >> 32
-        x = report & 0xFFFFFFFF
+        (h, x) = report
         if hash(key, h) == x:
             return self._fq1
         else:
