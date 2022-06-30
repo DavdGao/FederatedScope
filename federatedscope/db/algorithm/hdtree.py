@@ -87,14 +87,20 @@ class LDPHDTree(object):
                 self.trees[attr.name] = tree
                 self.tree_heights[attr.name] = tree.height
             else:
-                self.tree[attr.name] = None
+                self.trees[attr.name] = None
                 self.tree_heights[attr.name] = 2
         layers = [range(self.tree_heights[attr.name]) for attr in self.sensitive_attributes]
         self.hdnode_layers = [report_layer for report_layer in itertools.product(*layers)]
 
+    def decode(self, report, hd_layers, hd_intervals):
+        (report_layers, report_value) = eval(report)
+        result = 0
+        for i, layer in enumerate(hd_layers):
+            if report_layers == layer:
+                result += self.fo.decodes(report_value, hd_intervals[i]) * len(self.hdnode_layers)
+        return result
 
     def encode_row(self, row):
-        print(row)
         report_layer = random.choice(self.hdnode_layers)
         values = []
         for i, layer in enumerate(report_layer):
@@ -143,3 +149,37 @@ class LDPHDTree(object):
             reportpb = rowpb.cells.add()
             reportpb.s = encoded_reports[i]
         return encoded_table
+
+    def get_query_layers(self, filters):
+        attribute_constraints = []
+        for i, attr in enumerate(self.sensitive_attributes):
+            if attr.type == datapb.DataType.INT or attr.type == datapb.DataType.FLOAT:
+                if attr.name in filters:
+                    interval = (filters[attr.name]['min'], filters[attr.name]['max'])
+                else:
+                    interval = (attr.min_value, attr.max_value)
+                attribute_constraints.append(self.trees[attr.name].decompose_interval(interval[0], interval[1]))
+            else:
+                if attr.name in filters:
+                    str_value = (1, filters[attr.name]['min'])
+                else:
+                    str_value = (0, None)
+                attribute_constraints.append([str_value])
+        query_hd = [hd for hd in itertools.product(*attribute_constraints)]
+        query_hd_layers = []
+        query_hd_intervals = []
+        for hd in query_hd:
+            hd_layer = []
+            hd_interval = []
+            for layer, value in hd:
+                hd_layer.append(layer)
+                hd_interval.append(value)
+            query_hd_layers.append(tuple(hd_layer))
+            query_hd_intervals.append(hd_interval)
+        return (query_hd_layers, query_hd_intervals)
+
+    def add(self, buffer, report, agg_value, query_hd_layers, query_hd_intervals):
+        result = self.decode(report, query_hd_layers, query_hd_intervals)
+        buffer[0] += result
+        buffer[1] += result * agg_value
+        buffer[2] += agg_value

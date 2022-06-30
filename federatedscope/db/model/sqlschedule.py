@@ -5,6 +5,9 @@ class Query(object):
     def __init__(self, querypb):
         self.querypb = querypb
 
+    def target_table_name(self):
+        return self.querypb.table_name
+
     def get_simple_agg(self):
         """
         get simple aggregate exps in the query plan.
@@ -66,7 +69,4 @@ class Query(object):
                     filters[attr] = {}
                     filters[attr]['min'] = value
                     filters[attr]['max'] = value
-        ranges = []
-        for attr in filters.keys():
-            ranges.append((attr, (filters[attr]['min'], filters[attr]['max'])))
-        return ranges
+        return filters

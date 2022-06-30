@@ -1,9 +1,10 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
 from federatedscope.db.algorithm.ldp import LDPOLH
 from federatedscope.db.algorithm.hdtree import LDPHDTree
-import federatedscope.db.model.sqlquery_pb2 as sqlpb
+from federatedscope.db.model.sqlschedule import Query
 import federatedscope.db.data.data as data
 import federatedscope.db.model.data_pb2 as datapb
+import federatedscope.db.model.sqlquery_pb2 as querypb
 import federatedscope.db.data.data_accessor as data_accessor
 
 import pandas as pd
@@ -35,17 +36,34 @@ class LocalSQLProcessor(BasicSQLProcessor):
         table = self.get_table(table_name)
         hdtree = LDPHDTree(table, eps, fanout)
         encoded_table = hdtree.encode_table()
-        return encoded_table
+        return (hdtree, encoded_table)
 
-    def query(self, query, eps: float, fanout: int):
+    def mda_query(self, query, eps: float, fanout: int):
         """
         query on local tables
         Args:
-            query (sqlpb.BasicSchedule): protocol buffer of query plan
+            query (Query): query plan
+            eps (float): ldp epsilon parameter
+            fanout (int): hdtree parameter
         """
-        table_name = query.table_name
-        encoded_table = data.Table.from_pb(self.encode_table(table_name, eps, fanout))
-        filters = query.exp_where
-        aggs = query.exp_agg
-        for i, row in encoded_table.data.iterrows():
-            pass
+        table_name = query.target_table_name()
+        (hdtree, encoded_table) = self.encode_table(table_name, eps, fanout)
+        table = data.Table.from_pb(encoded_table)
+        filters = query.get_range_predicate()
+        aggs = query.get_simple_agg()[0]
+        agg_attr = aggs[0]
+        agg_type = aggs[1]
+        agg_values = table.project([agg_attr])
+        agg_buffer = np.zeros(3)
+        (query_hd_layers, query_hd_intervals) = hdtree.get_query_layers(filters)
+        for i, row in table.data.iterrows():
+            agg_value = agg_values[agg_attr][i]
+            hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
+        if agg_type == querypb.Operator.CNT:
+            return agg_buffer[0]
+        elif agg_type == querypb.Operator.SUM:
+            return agg_buffer[1]
+        elif agg_type == querypb.Operator.AVG:
+            return float(agg_buffer[1]) / agg_buffer[0]
+        else:
+            raise ValueError("unsupported aggregate function")
