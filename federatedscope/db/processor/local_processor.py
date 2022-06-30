@@ -1,15 +1,10 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
-from federatedscope.db.algorithm.ldp import LDPOLH
-from federatedscope.db.algorithm.hdtree import LDPHDTree
-from federatedscope.db.model.sqlschedule import Query
 import federatedscope.db.data.data as data
-import federatedscope.db.model.data_pb2 as datapb
 import federatedscope.db.model.sqlquery_pb2 as querypb
 import federatedscope.db.data.data_accessor as data_accessor
+from federatedscope.db.algorithm.hdtree import LDPHDTree
 
-import pandas as pd
 import numpy as np
-import os
 
 
 class LocalSQLProcessor(BasicSQLProcessor):

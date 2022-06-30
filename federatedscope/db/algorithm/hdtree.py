@@ -23,7 +23,7 @@ class RangeTree(object):
         self.layer = layer
         self.height = 1
         if max - min + 1 > delta:
-            step_size = ((max - min + 1) / fanout)
+            step_size = int((max - min + 1) / fanout)
             if step_size == 0:
                 step_size = 1
             cur_min, cur_max = min, min + step_size - 1

@@ -38,7 +38,8 @@ class LDPOLH(object):
             key: the target value
         """
         (h, x) = report
-        if hash(key, h) == x:
+        r = hash(key, h) % self._g
+        if r == x:
             return self._fq1
         else:
             return self._fq0
