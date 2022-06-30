@@ -13,6 +13,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+import data_pb2 as data__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -20,8 +21,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0esqlquery.proto\"_\n\nExpression\x12\x10\n\x08operator\x18\x01 \x01(\t\x12\x1c\n\x07\x65lement\x18\x02 \x03(\x0b\x32\x0b.Expression\x12\x0b\n\x01i\x18\x03 \x01(\x03H\x00\x12\x0b\n\x01s\x18\x04 \x01(\tH\x00\x42\x07\n\x05value\"\xa4\x01\n\rBasicSchedule\x12\x1f\n\nexp_select\x18\x01 \x01(\x0b\x32\x0b.Expression\x12\x12\n\ntable_name\x18\x02 \x01(\t\x12\x1e\n\texp_where\x18\x03 \x03(\x0b\x32\x0b.Expression\x12\x1c\n\x07\x65xp_agg\x18\x04 \x03(\x0b\x32\x0b.Expression\x12 \n\x08\x63hildren\x18\x05 \x03(\x0b\x32\x0e.BasicSchedule*7\n\x08Operator\x12\x07\n\x03REF\x10\x00\x12\x06\n\x02GE\x10\x01\x12\x06\n\x02LE\x10\x02\x12\t\n\x05\x43OUNT\x10\x64\x12\x07\n\x03SUM\x10\x65\x62\x06proto3')
-)
+  serialized_pb=_b('\n\x0esqlquery.proto\x1a\ndata.proto\"\x91\x01\n\nExpression\x12\x1b\n\x08operator\x18\x01 \x01(\x0e\x32\t.Operator\x12\x1d\n\x08\x63hildren\x18\x02 \x03(\x0b\x32\x0b.Expression\x12\x17\n\x04type\x18\x03 \x01(\x0e\x32\t.DataType\x12\x0b\n\x01i\x18\n \x01(\x03H\x00\x12\x0b\n\x01\x66\x18\x0b \x01(\x02H\x00\x12\x0b\n\x01s\x18\x0c \x01(\tH\x00\x42\x07\n\x05value\"\xa4\x01\n\rBasicSchedule\x12\x1f\n\nexp_select\x18\x01 \x03(\x0b\x32\x0b.Expression\x12\x12\n\ntable_name\x18\x02 \x01(\t\x12\x1e\n\texp_where\x18\x03 \x03(\x0b\x32\x0b.Expression\x12\x1c\n\x07\x65xp_agg\x18\x04 \x03(\x0b\x32\x0b.Expression\x12 \n\x08\x63hildren\x18\x05 \x03(\x0b\x32\x0e.BasicSchedule*O\n\x08Operator\x12\x07\n\x03REF\x10\x00\x12\x07\n\x03LIT\x10\x01\x12\x06\n\x02GE\x10\n\x12\x06\n\x02LE\x10\x0b\x12\x06\n\x02\x45Q\x10\x0c\x12\x07\n\x03\x43NT\x10\x64\x12\x07\n\x03SUM\x10\x65\x12\x07\n\x03\x41VG\x10\x66\x62\x06proto3')
+  ,
+  dependencies=[data__pb2.DESCRIPTOR,])
 
 _OPERATOR = _descriptor.EnumDescriptor(
   name='Operator',
@@ -34,35 +36,50 @@ _OPERATOR = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='GE', index=1, number=1,
+      name='LIT', index=1, number=1,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='LE', index=2, number=2,
+      name='GE', index=2, number=10,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='COUNT', index=3, number=100,
+      name='LE', index=3, number=11,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SUM', index=4, number=101,
+      name='EQ', index=4, number=12,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CNT', index=5, number=100,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SUM', index=6, number=101,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='AVG', index=7, number=102,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=282,
-  serialized_end=337,
+  serialized_start=345,
+  serialized_end=424,
 )
 _sym_db.RegisterEnumDescriptor(_OPERATOR)
 
 Operator = enum_type_wrapper.EnumTypeWrapper(_OPERATOR)
 REF = 0
-GE = 1
-LE = 2
-COUNT = 100
+LIT = 1
+GE = 10
+LE = 11
+EQ = 12
+CNT = 100
 SUM = 101
+AVG = 102
 
 
 
@@ -75,28 +92,42 @@ _EXPRESSION = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='operator', full_name='Expression.operator', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=1, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='element', full_name='Expression.element', index=1,
+      name='children', full_name='Expression.children', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='i', full_name='Expression.i', index=2,
-      number=3, type=3, cpp_type=2, label=1,
+      name='type', full_name='Expression.type', index=2,
+      number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='s', full_name='Expression.s', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      name='i', full_name='Expression.i', index=3,
+      number=10, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='f', full_name='Expression.f', index=4,
+      number=11, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='s', full_name='Expression.s', index=5,
+      number=12, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -116,8 +147,8 @@ _EXPRESSION = _descriptor.Descriptor(
       name='value', full_name='Expression.value',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=18,
-  serialized_end=113,
+  serialized_start=31,
+  serialized_end=176,
 )
 
 
@@ -130,8 +161,8 @@ _BASICSCHEDULE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='exp_select', full_name='BasicSchedule.exp_select', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -175,14 +206,19 @@ _BASICSCHEDULE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=116,
-  serialized_end=280,
+  serialized_start=179,
+  serialized_end=343,
 )
 
-_EXPRESSION.fields_by_name['element'].message_type = _EXPRESSION
+_EXPRESSION.fields_by_name['operator'].enum_type = _OPERATOR
+_EXPRESSION.fields_by_name['children'].message_type = _EXPRESSION
+_EXPRESSION.fields_by_name['type'].enum_type = data__pb2._DATATYPE
 _EXPRESSION.oneofs_by_name['value'].fields.append(
   _EXPRESSION.fields_by_name['i'])
 _EXPRESSION.fields_by_name['i'].containing_oneof = _EXPRESSION.oneofs_by_name['value']
+_EXPRESSION.oneofs_by_name['value'].fields.append(
+  _EXPRESSION.fields_by_name['f'])
+_EXPRESSION.fields_by_name['f'].containing_oneof = _EXPRESSION.oneofs_by_name['value']
 _EXPRESSION.oneofs_by_name['value'].fields.append(
   _EXPRESSION.fields_by_name['s'])
 _EXPRESSION.fields_by_name['s'].containing_oneof = _EXPRESSION.oneofs_by_name['value']

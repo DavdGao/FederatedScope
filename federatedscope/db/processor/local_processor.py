@@ -37,11 +37,15 @@ class LocalSQLProcessor(BasicSQLProcessor):
         encoded_table = hdtree.encode_table()
         return encoded_table
 
-
-    def query(self, query):
+    def query(self, query, eps: float, fanout: int):
         """
         query on local tables
         Args:
             query (sqlpb.BasicSchedule): protocol buffer of query plan
         """
-        pass
+        table_name = query.table_name
+        encoded_table = data.Table.from_pb(self.encode_table(table_name, eps, fanout))
+        filters = query.exp_where
+        aggs = query.exp_agg
+        for i, row in encoded_table.data.iterrows():
+            pass

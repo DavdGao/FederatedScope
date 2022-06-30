@@ -118,5 +118,3 @@ def protocol_to_pandas(schemapb, rowspb):
             i = i + 1
         rows.append(row)
     return pd.DataFrame(rows, columns=schema.names())
-
-

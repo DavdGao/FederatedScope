@@ -1,24 +1,30 @@
 syntax="proto3";
+import "data.proto";
 
 enum Operator {
   REF = 0;
-  GE = 1;
-  LE = 2;
-  COUNT = 100;
+  LIT = 1;
+  GE = 10;
+  LE = 11;
+  EQ = 12;
+  CNT = 100;
   SUM = 101;
+  AVG = 102;
 }
 
 message Expression{
-  string operator = 1;
-  repeated Expression element = 2;
+  Operator operator = 1;
+  repeated Expression children = 2;
+  DataType type = 3;
   oneof value {
-    int64 i = 3;
-    string s = 4;
+    int64 i = 10;
+    float f = 11;
+    string s = 12;
   }
 }
 
 message BasicSchedule{
-  Expression exp_select = 1;
+  repeated Expression exp_select = 1;
   string table_name = 2;
   repeated Expression exp_where = 3;
   repeated Expression exp_agg = 4;
