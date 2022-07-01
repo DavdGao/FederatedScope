@@ -26,9 +26,13 @@ class LDPOLH(object):
         Returns:
             tuple(int, int): left is the random seed, right is the hash result
         """
+        threshold = random.random()
         h = random.randint(0, self._max_seed)
-        x = hash(value, h) % self._g
-        return (h, x)
+        if threshold < self._thres:
+            return (h, random.randint(0, self._g - 1))
+        else:
+            x = hash(value, h) % self._g
+            return (h, x)
 
     def decodes(self, report, key):
         """
