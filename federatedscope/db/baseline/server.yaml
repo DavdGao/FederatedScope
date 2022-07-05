@@ -1,6 +1,8 @@
+role: server
 data:
   root: data
-distribute:
-  role: server
-  server_host: 0.0.0.0
-  server_port: 50050
+  type: csv
+  schema: [{'name':id,'type':'int'},{'name':'activetime','type':'int','min':1.0,'max':2.1},{'name':'purchase','type':'int','min':80,'max':120}]
+server:
+  host: 0.0.0.0
+  port: 50050

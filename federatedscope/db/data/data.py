@@ -46,6 +46,7 @@ class DataSet(object):
     def to_pb(self):
         return pandas_to_protocol(self.data, self.schema.to_pb())
 
+    @classmethod
     def from_pb(datasetpb):
         return DataSet(Schema(datasetpb.schema), protocol_to_pandas(datasetpb.schema, datasetpb.rows))
 

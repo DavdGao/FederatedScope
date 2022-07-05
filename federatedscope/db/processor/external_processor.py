@@ -1,7 +1,6 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
-from federatedscope.db.processor.local_processor import LocalSQLProcessor
-from federatedscope.db.model.backup import SQLQuery, Filter, Aggregate
-from federatedscope.db.data.data import Data
+from federatedscope.db.model.backup import SQLQuery
+from federatedscope.db.data.data import DataSet
 
 
 import xxhash
@@ -34,14 +33,14 @@ class ExternalSQLProcessor(BasicSQLProcessor):
             local_result, random.randint(0, maxsize))
         return perturbed_result
 
-    def lho_perturb(self, data: Data, seed):
-        for i in range(len(data.rows)):
-            for j in range(len(data.rows[i])):
+    def lho_perturb(self, dataset: DataSet, seed):
+        for i in range(len(dataset.rows)):
+            for j in range(len(dataset.rows[i])):
                 h = (xxhash.xxh32(
-                    str(data.rows[i][j]), seed=seed).intdigest() % self.g)
+                    str(dataset.rows[i][j]), seed=seed).intdigest() % self.g)
                 threshold = np.random.random_sample()
                 if threshold < self.p:
-                    data.rows[i][j] = random.randint(0, self.g)
+                    dataset.rows[i][j] = random.randint(0, self.g)
                 else:
-                    data.rows[i][j] = h
-        return data
+                    dataset.rows[i][j] = h
+        return dataset

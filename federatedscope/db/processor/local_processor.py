@@ -1,7 +1,7 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
 import federatedscope.db.data.data as data
 import federatedscope.db.model.sqlquery_pb2 as querypb
-import federatedscope.db.data.data_accessor as data_accessor
+import federatedscope.db.data.csv_accessor as data_accessor
 from federatedscope.db.algorithm.hdtree import LDPHDTree
 
 import numpy as np
@@ -62,3 +62,4 @@ class LocalSQLProcessor(BasicSQLProcessor):
             return float(agg_buffer[1]) / agg_buffer[0]
         else:
             raise ValueError("unsupported aggregate function")
+

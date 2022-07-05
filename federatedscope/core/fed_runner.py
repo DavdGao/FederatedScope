@@ -74,8 +74,8 @@ class FedRunner(object):
         To set up server or client for distributed mode.
         """
         self.server_address = {
-            'host': self.cfg.distribute.server_host,
-            'port': self.cfg.distribute.server_port
+            'host': self.cfg.server.host,
+            'port': self.cfg.server.port
         }
         if self.cfg.distribute.role == 'server':
             self.server = self._setup_server()

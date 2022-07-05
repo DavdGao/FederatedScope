@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 class Client(Worker):
 
     def __init__(self, ID, server_id, config):
-        host = config.distribute.client_host
-        port = config.distribute.client_port
+        host = config.client.host
+        port = config.client.port
         super(Client, self).__init__(ID, host, port, config)
 
         self.server_id = server_id
@@ -30,7 +30,7 @@ class Client(Worker):
         self.sql_parser = SQLParser()
         self.sql_scheduler = SQLScheduler()
         self.sql_processor_external = ExternalSQLProcessor()
-        self.sql_processor_local = LocalSQLProcessor(datadir=self._cfg.data.root)
+        self.sql_processor_local = LocalSQLProcessor()
         self.sql_aggregator = SQLAggregator()
 
         # Pass and store the query result from remote client
@@ -39,8 +39,8 @@ class Client(Worker):
 
         self.comm_manager.add_neighbors(neighbor_id=server_id,
                                         address={
-                                            'host': self._cfg.distribute.server_host,
-                                            'port': self._cfg.distribute.server_port
+                                            'host': self._cfg.server.host,
+                                            'port': self._cfg.server.port
                                         })
 
     def join_in(self):
@@ -58,7 +58,7 @@ class Client(Worker):
         """
         Upload encrypted data to the server
         """
-        logger.info(f"Send encrypted data to the server with epsilon={self.cfg.epsilon}.")
+        logger.info(f"Send encrypted data to the server with epsilon={self._cfg.ldp.epsilon}.")
         # TODO: LDP here
         data = self.data
         self.comm_manager.send(
@@ -68,7 +68,6 @@ class Client(Worker):
                     # TODO: grpc data type
                     content=data)
         )
-
 
     def run(self):
         """
@@ -80,17 +79,18 @@ class Client(Worker):
         # Upload data if permitted
         if self._cfg.client.upload_data:
             self.upload_data()
+        else:
+            # Start a remote listener
+            p_remote = Process(target=self.listen_remote)
+            p_remote.start()
+            self.listen_remote()
 
-        # Start a remote listener
-        # p_remote = Process(target=self.listen_remote)
-        # p_remote.start()
-        # self.listen_remote()
-
-        # Start a local listener
-        # TODO: create a process and share interface among local/remote process
-        # p_local = Process(target=self.listen_local)
-        # p_local.start()
-        self.listen_local()
+        if self._cfg.client.local_process:
+            # Start a local listener
+            # TODO: create a process and share interface among local/remote process
+            p_local = Process(target=self.listen_local)
+            p_local.start()
+            self.listen_local()
 
     def listen_local(self):
         for statement in self.interface.get_input():

@@ -1,6 +1,6 @@
 from federatedscope.core.communication import gRPCCommManager
 from federatedscope.db.worker.handler import HANDLER
-from federatedscope.db.data.data import get_data
+from federatedscope.db.data.csv_accessor import get_data
 
 import logging
 
@@ -23,7 +23,7 @@ class Worker(object):
         self.msg_handlers = dict()
         self._register_default_handlers()
 
-        logger.info('{}: Listen to {}:{}...'.format(self._cfg.distribute.role, host, port))
+        logger.info('{}: Listen to {}:{}...'.format(self._cfg.role, host, port))
         self.comm_manager = gRPCCommManager(host=host, port=port, client_num=2)
 
         # Load data

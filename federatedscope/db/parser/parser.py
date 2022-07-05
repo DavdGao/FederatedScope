@@ -1,4 +1,4 @@
-from federatedscope.db.model.sqlquery_pb2 import BasicQuery
+from federatedscope.db.model.sqlquery_pb2 import BasicSchedule
 
 class SQLParser(object):
     KEYWORDS = [
@@ -23,7 +23,7 @@ class SQLParser(object):
 
         """
 
-        query = BasicQuery()
+        query = BasicSchedule()
         # For now, we don't consider the nested query
         # TODO: nested query
         # TODO: consider the whitespace after ','
@@ -42,12 +42,6 @@ class SQLParser(object):
                 query.exp_where = next_word
             elif word.upper() == 'GROUPBY':
                 query.exp_groupby = next_word
-            # elif word.upper() == 'HAVING':
-            #     query.exp_have = next_word
-            # elif word.upper() == 'ORDERBY':
-            #     query.exp_orderby = next_word
-            # elif word.upper() == 'LIMIT':
-            #     query.exp_limit = next_word
 
         return query
 

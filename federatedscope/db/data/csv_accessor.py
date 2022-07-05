@@ -54,13 +54,13 @@ def parse_schema(schema_str):
     """
     parse a schema string 
     Args:
-        schema_str (string): schema of the csv file in string, contains a list of attribute descriptions, see parse_attribute for details
+        schema_str (list): schema of the csv file in string, contains a list of attribute descriptions, see parse_attribute for details
 
     Returns:
         Wrapper of protocol buffer Schema
     """
     schema = datapb.Schema()
-    attrs = eval(schema_str.strip())
+    attrs = schema_str
     attrpbs = []
     for attr in attrs:
         if 'name' not in attr:
@@ -108,8 +108,7 @@ def get_data(cfg_data):
         return None
 
     if cfg_data.type == 'csv':
-        data = load_csv(cfg_data.root, cfg_data.primary_key,
-                        cfg_data.schema, cfg_data.types)
+        data = load_csv(cfg_data.root, cfg_data.schema)
     else:
         raise NotImplementedError(
             f"Data type {cfg_data.type} is not implemented.")

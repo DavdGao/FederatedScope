@@ -4,6 +4,7 @@ from federatedscope.db.aggregator.aggregator import SQLAggregator
 from federatedscope.db.scheduler.scheduler import SQLScheduler
 from federatedscope.core.message import Message
 from federatedscope.db.worker.handler import HANDLER
+from federatedscope.db.data.data import DataSet
 import logging
 import time
 
@@ -12,8 +13,8 @@ logger = logging.getLogger(__name__)
 class Server(Worker):
 
     def __init__(self, ID, config):
-        host = config.distribute.server_host
-        port = config.distribute.server_port
+        host = config.server.host
+        port = config.server.port
         super(Server, self).__init__(ID, host, port, config)
 
         self.join_in_client_num = 0
@@ -22,7 +23,8 @@ class Server(Worker):
         self.sql_scheduler = SQLScheduler()
         self.sql_aggregator = SQLAggregator()
 
-        self.data_all = None
+        self.data_global = None
+
 
     def run(self):
         while True:
@@ -60,14 +62,10 @@ class Server(Worker):
         sender, data = message.sender, message.content
 
         # Merge data: hfl for clients and join with server
-        if self.data_all is None:
+        if self.data_global is None:
             # The first time merging
-            if self.data is None:
-                self.data_all = data
-            else:
-                # Join the data from client
-                self.data_all = self.data.join(data)
+            self.data_global = data
         else:
-            # Suppose it is equal join
-            self.data_all.join(data)
-
+            # TODO: more elegant and feasible
+            data = DataSet.from_pb(data)
+            self.data_global = self.data_global.set_index(self._cfg.data.primary_key).join(data.set_index(self._cfg.data.primary_key))

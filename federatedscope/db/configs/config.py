@@ -15,7 +15,6 @@ def init_global_cfg(cfg):
     # If the `cfg.data.type` is csv, the user need to provide schema and types by config
     cfg.data.primary_key = ''
     cfg.data.schema = []
-    cfg.data.types = []
 
     # ------------------------------------------------------------------------ #
     # Server related options
@@ -34,6 +33,14 @@ def init_global_cfg(cfg):
     cfg.client.host = '0.0.0.0'
     cfg.client.port = 50050
     cfg.client.upload_data = False
+    cfg.client.local_process = False
+
+    # ------------------------------------------------------------------------ #
+    # Local-DP related options
+    # ------------------------------------------------------------------------ #
+    cfg.ldp = CN()
+
+    cfg.ldp.epsilon = 0.
 
     # ------------------------------------------------------------------------ #
     # Distribute training related options
@@ -43,5 +50,6 @@ def init_global_cfg(cfg):
     cfg.distribute.grpc_max_send_message_length = 100 * 1024 * 1024
     cfg.distribute.grpc_max_receive_message_length = 100 * 1024 * 1024
     cfg.distribute.grpc_enable_http_proxy = False
+
 
 init_global_cfg(global_cfg)
