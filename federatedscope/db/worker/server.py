@@ -5,6 +5,7 @@ from federatedscope.db.scheduler.scheduler import SQLScheduler
 from federatedscope.core.message import Message
 from federatedscope.db.worker.handler import HANDLER
 from federatedscope.db.data.data import Table
+from federatedscope.db.algorithm.hdtree import LDPHDTree
 import federatedscope.db.model.data_pb2 as datapb
 import logging
 import time
@@ -68,6 +69,8 @@ class Server(Worker):
         right_key = table.schema.primary()
         if self.data_global is None:
             self.data_global = self.data.join(table, self.join_key.name, right_key.name)
+            encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, datapb.Schema())
+            self.hdtree = LDPHDTree(encoded_schema.attributes, self._cfg.ldp.epsilon, self._cfg.ldp.fanout)
         else:
             self.data_global.concat(table)
         print(self.data_global)

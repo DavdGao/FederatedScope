@@ -37,8 +37,8 @@ class LocalSQLProcessor(BasicSQLProcessor):
         Returns:
             (hdtree, encoded table)
         """
-        hdtree = LDPHDTree(table, eps, fanout)
-        encoded_table = hdtree.encode_table()
+        hdtree = LDPHDTree(table.schema.sensitive_attrs(), eps, fanout)
+        encoded_table = hdtree.encode_table(table)
         return (hdtree, encoded_table)
 
     def mda_query(self, query, eps: float, fanout: int):
@@ -70,4 +70,3 @@ class LocalSQLProcessor(BasicSQLProcessor):
             return float(agg_buffer[1]) / agg_buffer[0]
         else:
             raise ValueError("unsupported aggregate function")
-
