@@ -1,0 +1,47 @@
+syntax="proto3";
+
+enum DataType {
+  INT = 0;
+  FLOAT = 1;
+  STRING = 2;
+}
+
+message Cell {
+  oneof value {
+    int64 i = 1;
+    double f = 2;
+    string s = 3;
+  }
+}
+
+message Row {
+  repeated Cell cells = 1;
+}
+
+message Rows {
+  repeated Row rows = 1;
+}
+
+message Attribute {
+  string name = 1;
+  DataType type = 2;
+  bool sensitive = 3;
+  bool has_range = 4;
+  Cell min_value = 5;
+  Cell max_value = 6;
+  Cell delta = 7;
+}
+
+message Schema {
+  repeated Attribute attributes = 1;
+}
+
+message DataSet {
+  Schema schema = 1;
+  Rows rows = 2;
+}
+
+message Table {
+  string name = 1;
+  DataSet data = 2;
+}
