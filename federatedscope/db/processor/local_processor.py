@@ -1,27 +1,23 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
-from federatedscope.db.model.backup import SQLQuery, Filter, Aggregate
-from federatedscope.db.data.schema import Attribute, Schema
-from federatedscope.db.data.data import Data
+import federatedscope.db.data.data as data
+import federatedscope.db.model.sqlquery_pb2 as querypb
+import federatedscope.db.data.data_accessor as data_accessor
+from federatedscope.db.algorithm.hdtree import LDPHDTree
 
-import pandas as pd
-import os
+import numpy as np
 
 
 class LocalSQLProcessor(BasicSQLProcessor):
-    # read all csv files in datadir, and use file name as table name
-    def __init__(self, datadir: str):
+    def __init__(self):
         self.tables = {}
         self.schemas = {}
-        datafiles = os.listdir(datadir)
-        for file in datafiles:
-            if file.endswith('.csv'):
-                table_name = os.path.splitext(file)[0]
-                df = pd.read_csv(os.path.join(datadir, file))
-                self.tables[table_name] = df
-                print("load table " + file + "with columns:")
-                print(df.columns)
-                self.schemas[table_name] = self.__convert_schema(
-                    df, df.columns)
+
+    def load_table(self, table_path: str, schema_str: str):
+        table = data_accessor.load_csv(table_path, schema_str)
+        self.tables[table.name] = table
+
+    def has_table(self, table_name: str):
+        return table_name in self.tables
 
     def get_table(self, table_name: str):
         return self.tables[table_name]
@@ -29,39 +25,40 @@ class LocalSQLProcessor(BasicSQLProcessor):
     def get_schema(self, table_name: str):
         return self.schemas[table_name]
 
-    def __convert_schema(self, df, attr_names) -> Schema:
-        attrs = []
-        if isinstance(df, pd.DataFrame):
-            for attr in zip(attr_names, df.dtypes):
-                attrs.append(Attribute(attr[0], attr[1]))
-        else:
-            attrs.append(Attribute(attr_names[0], type(df)))
-        return Schema(attrs)
+    def encode_table(self, table_name: str, eps: float, fanout: int):
+        if not self.has_table(table_name):
+            raise ValueError("table " + table_name + " not exists")
+        table = self.get_table(table_name)
+        hdtree = LDPHDTree(table, eps, fanout)
+        encoded_table = hdtree.encode_table()
+        return (hdtree, encoded_table)
 
-    def __convert(self, qid, df, attrs) -> Data:
-        schema = self.__convert_schema(df, attrs)
-        if isinstance(df, pd.DataFrame):
-            return Data(qid, schema, df.values.tolist())
+    def mda_query(self, query, eps: float, fanout: int):
+        """
+        query on local tables
+        Args:
+            query (Query): query plan
+            eps (float): ldp epsilon parameter
+            fanout (int): hdtree parameter
+        """
+        table_name = query.target_table_name()
+        (hdtree, encoded_table) = self.encode_table(table_name, eps, fanout)
+        table = data.Table.from_pb(encoded_table)
+        filters = query.get_range_predicate()
+        aggs = query.get_simple_agg()[0]
+        agg_attr = aggs[0]
+        agg_type = aggs[1]
+        agg_values = table.project([agg_attr])
+        agg_buffer = np.zeros(3)
+        (query_hd_layers, query_hd_intervals) = hdtree.get_query_layers(filters)
+        for i, row in table.data.iterrows():
+            agg_value = agg_values[agg_attr][i]
+            hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
+        if agg_type == querypb.Operator.CNT:
+            return agg_buffer[0]
+        elif agg_type == querypb.Operator.SUM:
+            return agg_buffer[1]
+        elif agg_type == querypb.Operator.AVG:
+            return float(agg_buffer[1]) / agg_buffer[0]
         else:
-            return Data(qid, schema, [[df]])
-
-    def query(self, query: SQLQuery):
-        tb = self.get_table(query.table_name)
-        if query.filters != None:
-            for filt in query.filters:
-                tb = tb[(tb[filt.attr] >= filt.left) &
-                        (tb[filt.attr] <= filt.right)]
-        if query.attrs != None and len(query.attrs) > 0:
-            return self.__convert(query.qid, tb[query.attrs], query.attrs)
-        elif query.aggregate != None:
-            agg_type = query.aggregate.func_type
-            agg_attr = query.aggregate.attr
-            if agg_type == 'COUNT':
-                return self.__convert(query.qid, tb[agg_attr].count(), ["COUNT(%s)" % agg_attr])
-            elif agg_type == "SUM":
-                return self.__convert(query.qid, tb[agg_attr].sum(), ["SUM(%s)" % agg_attr])
-            else:
-                raise NotImplementedError("Unsupported aggregate function")
-        else:
-            raise ValueError("No output in query")
-
+            raise ValueError("unsupported aggregate function")
