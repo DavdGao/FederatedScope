@@ -34,6 +34,15 @@ class Schema(object):
     def name(self, index):
         return self.schemapb.attributes[index]
 
+    def primary(self):
+        primaries = list(filter(lambda attr : attr.primary, self.schemapb.attributes))
+        if len(primaries) == 0:
+            raise ValueError("No primary key in data")
+        elif len(primaries) > 1:
+            raise ValueError("Mulitple primary key in data")
+        else:
+            return primaries[0]
+
     def to_pb(self):
         return self.schemapb
 
@@ -60,9 +69,24 @@ class Table(object):
     def get_row(self, row_idx: int):
         return self.data[row_idx]
 
-    def join(self, data):
-        # TODO: more feasible
-        pass
+    def join(self, table, left_key: str, right_key: str):
+        left = self.data
+        right = table.data
+        out_data = pd.merge(left, right, how='inner', left_on=left_key, right_on=right_key, suffixes=(False, '_r'))
+        out_schemapb = datapb.Schema()
+        out_schemapb.attributes.extend(self.schema.schemapb.attributes)
+        for attr in table.schema.schemapb.attributes:
+            if attr.name == right_key:
+                if attr.name in out_data.columns:
+                    out_data.drop(columns=right_key)
+            elif attr.name not in out_data.columns:
+                raise ValueError("Duplicate attribute {}", attr.name)
+            else:
+                out_schemapb.attributes.extend([attr])
+        return Table("", Schema(out_schemapb), out_data)
+
+    def concat(self, table):
+        pd.concat([self.data, table.data], axis=0)
 
     def project(self, attr_names):
         return self.data[attr_names]

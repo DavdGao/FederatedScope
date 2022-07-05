@@ -31,6 +31,8 @@ def parse_attribute(attr):
         attrpb.type = datapb.DataType.STRING
     if 'sensitive' in attr:
         attrpb.sensitive = bool(attr['sensitive'])
+    if 'primary' in attr:
+        attrpb.primary = bool(attr['primary'])
     # set has_range when schema gives min max and delta
     if 'min' in attr and 'max' in attr and 'delta' in attr:
         if attrpb.type == datapb.DataType.INT:
@@ -50,17 +52,16 @@ def parse_attribute(attr):
     return attrpb
 
 
-def parse_schema(schema_str):
+def parse_schema(attrs):
     """
     parse a schema string 
     Args:
-        schema_str (list): schema of the csv file in string, contains a list of attribute descriptions, see parse_attribute for details
+        attr_list (list): schema of the csv file, contains a list of attribute descriptions, see parse_attribute for details
 
     Returns:
         Wrapper of protocol buffer Schema
     """
     schema = datapb.Schema()
-    attrs = schema_str
     attrpbs = []
     for attr in attrs:
         if 'name' not in attr:
@@ -74,17 +75,17 @@ def parse_schema(schema_str):
 
 
 
-def load_csv(path, schema_str):
+def load_csv(path, attrs):
     """
     load a csv file 
     Args:
         path (string): the path to the csv file (use file name as table name)
-        schema_str (string): see parse_schema for details
+        attrs (list): see parse_schema for details
     Returns:
         Table: Wrapper of protocol buffer Table
     """
     # todo: optimize schema config format
-    schema = parse_schema(schema_str)
+    schema = parse_schema(attrs)
     df = pd.read_csv(
         path,
         names=schema.names(),

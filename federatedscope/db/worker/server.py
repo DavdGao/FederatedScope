@@ -4,9 +4,11 @@ from federatedscope.db.aggregator.aggregator import SQLAggregator
 from federatedscope.db.scheduler.scheduler import SQLScheduler
 from federatedscope.core.message import Message
 from federatedscope.db.worker.handler import HANDLER
-from federatedscope.db.data.data import DataSet
+from federatedscope.db.data.data import Table
+import federatedscope.db.model.data_pb2 as datapb
 import logging
 import time
+from google.protobuf import text_format
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ class Server(Worker):
         self.sql_aggregator = SQLAggregator()
 
         self.data_global = None
+        self.join_key = self.data.schema.primary()
 
 
     def run(self):
@@ -60,12 +63,11 @@ class Server(Worker):
 
     def callback_funcs_for_upload_data(self, message: Message):
         sender, data = message.sender, message.content
-
-        # Merge data: hfl for clients and join with server
+        tablepb = text_format.Parse(data, datapb.Table())
+        table = Table.from_pb(tablepb)
+        right_key = table.schema.primary()
         if self.data_global is None:
-            # The first time merging
-            self.data_global = data
+            self.data_global = self.data.join(table, self.join_key.name, right_key.name)
         else:
-            # TODO: more elegant and feasible
-            data = DataSet.from_pb(data)
-            self.data_global = self.data_global.set_index(self._cfg.data.primary_key).join(data.set_index(self._cfg.data.primary_key))
+            self.data_global.concat(table)
+        print(self.data_global)

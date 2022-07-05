@@ -7,6 +7,7 @@ from federatedscope.db.processor.external_processor import ExternalSQLProcessor
 from federatedscope.db.aggregator.aggregator import SQLAggregator
 from federatedscope.db.scheduler.scheduler import SQLScheduler
 from federatedscope.db.interface import Interface
+import federatedscope.db.model.data_pb2 as datapb
 
 import logging
 
@@ -58,15 +59,14 @@ class Client(Worker):
         """
         Upload encrypted data to the server
         """
-        logger.info(f"Send encrypted data to the server with epsilon={self._cfg.ldp.epsilon}.")
-        # TODO: LDP here
-        data = self.data
+        logger.info(f"Send encrypted data to the server with epsilon={self._cfg.ldp.epsilon}, fanout={self._cfg.ldp.fanout}.")
+        (_, encoded_table) = self.sql_processor_local.encode_table(self.data, self._cfg.ldp.epsilon, self._cfg.ldp.fanout)
+        # todo: serialize into bytes to reduce storage space usage
         self.comm_manager.send(
             Message(msg_type=HANDLER.UPLOAD_DATA,
                     sender=self.ID,
                     receiver=[self.server_id],
-                    # TODO: grpc data type
-                    content=data)
+                    content=str(encoded_table))
         )
 
     def run(self):

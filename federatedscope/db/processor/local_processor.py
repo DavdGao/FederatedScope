@@ -25,10 +25,18 @@ class LocalSQLProcessor(BasicSQLProcessor):
     def get_schema(self, table_name: str):
         return self.schemas[table_name]
 
-    def encode_table(self, table_name: str, eps: float, fanout: int):
-        if not self.has_table(table_name):
-            raise ValueError("table " + table_name + " not exists")
-        table = self.get_table(table_name)
+    def encode_table(self, table, eps: float, fanout: int):
+        """
+        encode table with hd tree
+
+        Args:
+            table (data.Table): table to be encoded
+            eps (float): ldp epsilon parameter
+            fanout (int): hdtree parameter
+
+        Returns:
+            (hdtree, encoded table)
+        """
         hdtree = LDPHDTree(table, eps, fanout)
         encoded_table = hdtree.encode_table()
         return (hdtree, encoded_table)
