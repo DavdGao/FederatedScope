@@ -86,7 +86,7 @@ class Table(object):
         return Table("", Schema(out_schemapb), out_data)
 
     def concat(self, table):
-        pd.concat([self.data, table.data], axis=0)
+        self.data = pd.concat([self.data, table.data], axis=0)
 
     def project(self, attr_names):
         return self.data[attr_names]

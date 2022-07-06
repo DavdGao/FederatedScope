@@ -60,7 +60,7 @@ class LocalSQLProcessor(BasicSQLProcessor):
         agg_buffer = np.zeros(3)
         (query_hd_layers, query_hd_intervals) = hdtree.get_query_layers(filters)
         for i, row in table.data.iterrows():
-            agg_value = agg_values[agg_attr][i]
+            agg_value = row[agg_attr]
             hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
         if agg_type == querypb.Operator.CNT:
             return agg_buffer[0]

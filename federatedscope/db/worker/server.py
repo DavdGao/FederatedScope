@@ -1,12 +1,13 @@
 from federatedscope.db.worker.base_worker import Worker
 from federatedscope.db.parser.parser import SQLParser
-from federatedscope.db.aggregator.aggregator import SQLAggregator
+from federatedscope.db.processor.external_processor import ExternalSQLProcessor
 from federatedscope.db.scheduler.scheduler import SQLScheduler
 from federatedscope.core.message import Message
 from federatedscope.db.worker.handler import HANDLER
 from federatedscope.db.data.data import Table
-from federatedscope.db.algorithm.hdtree import LDPHDTree
+from federatedscope.db.model.sqlschedule import Query
 import federatedscope.db.model.data_pb2 as datapb
+import federatedscope.db.model.sqlquery_pb2 as querypb
 import logging
 import time
 from google.protobuf import text_format
@@ -24,11 +25,57 @@ class Server(Worker):
 
         self.sql_parser = SQLParser()
         self.sql_scheduler = SQLScheduler()
-        self.sql_aggregator = SQLAggregator()
+        self.sql_processor_external = ExternalSQLProcessor()
 
         self.data_global = None
         self.join_key = self.data.schema.primary()
+        self.generate_demo_query()
 
+    def generate_demo_query(self):
+        q = querypb.BasicSchedule()
+        q.table_name = "server"
+        # SUM(purchase)
+        agg = q.exp_agg.add()
+        agg.operator = querypb.Operator.SUM # the aggregation type
+        agg_attr = agg.children.add()
+        agg_attr.operator = querypb.Operator.REF
+        agg_attr.s = "purchase"
+        # where expressions
+        # age >= 30 and age <= 40
+        fi = q.exp_where.add()
+        fi.operator = querypb.Operator.GE
+        attr = fi.children.add()
+        attr.operator = querypb.Operator.REF
+        attr.s = "age"
+        value = fi.children.add()
+        value.operator = querypb.Operator.LIT
+        value.i = 30
+        fi = q.exp_where.add()
+        fi.operator = querypb.Operator.LE
+        attr = fi.children.add()
+        attr.operator = querypb.Operator.REF
+        attr.s = "age"
+        value = fi.children.add()
+        value.operator = querypb.Operator.LIT
+        value.i = 40
+        # salary >= 50 and salary <= 150
+        fi = q.exp_where.add()
+        fi.operator = querypb.Operator.GE
+        attr = fi.children.add()
+        attr.operator = querypb.Operator.REF
+        attr.s = "salary"
+        value = fi.children.add()
+        value.operator = querypb.Operator.LIT
+        value.i = 50
+        fi = q.exp_where.add()
+        fi.operator = querypb.Operator.LE
+        attr = fi.children.add()
+        attr.operator = querypb.Operator.REF
+        attr.s = "salary"
+        value = fi.children.add()
+        value.operator = querypb.Operator.LIT
+        value.i = 150
+        self.demo_query = Query(q)
 
     def run(self):
         while True:
@@ -67,10 +114,10 @@ class Server(Worker):
         tablepb = text_format.Parse(data, datapb.Table())
         table = Table.from_pb(tablepb)
         right_key = table.schema.primary()
+        join_table = self.data.join(table, self.join_key.name, right_key.name)
         if self.data_global is None:
-            self.data_global = self.data.join(table, self.join_key.name, right_key.name)
-            encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, datapb.Schema())
-            self.hdtree = LDPHDTree(encoded_schema.attributes, self._cfg.ldp.epsilon, self._cfg.ldp.fanout)
+            self.data_global = join_table
         else:
-            self.data_global.concat(table)
-        print(self.data_global)
+            self.data_global.concat(join_table)
+        print ("mda query SUM(purchase) where age >= 30 and age <= 40 and salary >= 50 and salary <= 150")
+        print (self.sql_processor_external.mda_query(self.demo_query, self.data_global, self._cfg.ldp.epsilon, self._cfg.ldp.fanout))

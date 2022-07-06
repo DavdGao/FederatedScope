@@ -30,7 +30,6 @@ class Client(Worker):
 
         self.sql_parser = SQLParser()
         self.sql_scheduler = SQLScheduler()
-        self.sql_processor_external = ExternalSQLProcessor()
         self.sql_processor_local = LocalSQLProcessor()
         self.sql_aggregator = SQLAggregator()
 

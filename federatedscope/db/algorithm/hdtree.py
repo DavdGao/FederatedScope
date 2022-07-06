@@ -11,6 +11,7 @@ class RangeTree(object):
         self.range = None
         self.layer = None
         self.height = None
+        random.seed()
 
     @staticmethod
     def factory(min, max, delta, fanout):
