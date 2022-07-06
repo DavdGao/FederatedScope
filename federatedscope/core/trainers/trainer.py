@@ -35,7 +35,7 @@ class Trainer(object):
                  data,
                  device,
                  config,
-                 only_for_eval=False,
+                 routines=['train', 'eval', 'finetune'],
                  monitor=None):
         self.cfg = config
         self.metric_calculator = MetricCalculator(config.eval.metrics)
@@ -57,16 +57,12 @@ class Trainer(object):
         # which is used to simply the flops, model size calculation
         self.ctx.mirrored_models = False
 
-        # Atomic operation during training/evaluation
-        self.hooks_in_train = collections.defaultdict(list)
-
-        # By default, use the same trigger keys
-        self.hooks_in_eval = copy.deepcopy(self.hooks_in_train)
-
-        # register necessary hooks into self.hooks_in_train and self.hooks_in_eval
-        if not only_for_eval:
-            self.register_default_hooks_train()
-        self.register_default_hooks_eval()
+        # create required routine functions
+        for routine in routines:
+            # register necessary hooks into self.hooks_in_${routine}
+            # By default, use the same trigger keys
+            setattr(self, f'hooks_in_{routine}')
+            getattr(self, f'register_default_hooks_{routine}')()
 
         if self.cfg.federate.mode == 'distributed':
             self.print_trainer_meta_info()
@@ -84,15 +80,13 @@ class Trainer(object):
         pass
 
     def reset_hook_in_train(self, target_trigger, target_hook_name=None):
-        hooks_dict = self.hooks_in_train
-        del_one_hook_idx = self._reset_hook_in_trigger(hooks_dict,
+        del_one_hook_idx = self._reset_hook_in_trigger(self.hooks_in_train,
                                                        target_hook_name,
                                                        target_trigger)
         return del_one_hook_idx
 
     def reset_hook_in_eval(self, target_trigger, target_hook_name=None):
-        hooks_dict = self.hooks_in_eval
-        del_one_hook_idx = self._reset_hook_in_trigger(hooks_dict,
+        del_one_hook_idx = self._reset_hook_in_trigger(self.hooks_in_eval,
                                                        target_hook_name,
                                                        target_trigger)
         return del_one_hook_idx
@@ -114,6 +108,8 @@ class Trainer(object):
 
     def _reset_hook_in_trigger(self, hooks_dict, target_hook_name,
                                target_trigger):
+        if hooks_dict is None:
+            raise AttributeError("The hooks_dict not found.")
         # clean/delete existing hooks for a specific trigger,
         # if target_hook_name given, will clean only the specific one; otherwise, will clean all hooks for the trigger.
         assert target_trigger in self.HOOK_TRIGGER, \
