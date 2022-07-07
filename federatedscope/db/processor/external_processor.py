@@ -11,11 +11,11 @@ from google.protobuf import text_format
 class ExternalSQLProcessor(BasicSQLProcessor):
     def mda_query(self, query, table, eps: float, fanout: int):
         """
-        process mda query on the specific table
+        process mda query on the specific ldp encoded table
 
         Args:
-            query (Query): the mda query plan
-            table (Table): the target table
+            query (Query): the mda query plan, only supports one aggregate expression, and all where expressions are on sensitive attribtues
+            table (Table): the ldp encoded table, the last attribute is ldp report
             eps (float): ldp parameter
             fanout (int): hdtree parameter
         """
