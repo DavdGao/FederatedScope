@@ -1,3 +1,6 @@
+import logging
+
+
 class Interface(object):
     def __init__(self):
         pass
@@ -5,6 +8,7 @@ class Interface(object):
     def get_input(self):
         tmp = ""
         # Main loop in the interface
+        print('get input')
         while True:
             cmds = input(">").strip().split(";")
             cmds[0] = " ".join([tmp, cmds[0]]).strip()

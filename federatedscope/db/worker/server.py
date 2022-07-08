@@ -8,6 +8,7 @@ from federatedscope.db.data.data import Table
 from federatedscope.db.model.sqlschedule import Query
 import federatedscope.db.model.data_pb2 as datapb
 import federatedscope.db.model.sqlquery_pb2 as querypb
+from multiprocessing import Process
 import logging
 import time
 from google.protobuf import text_format
@@ -78,9 +79,23 @@ class Server(Worker):
         self.demo_query = Query(q)
 
     def run(self):
+        # listen to remote gRPC request
+        # p_remote = Process(target=self.listen_remote)
+        # p_remote.start()
+
+        if self._cfg.local_query:
+            self.listen_local()
+
+
+    def listen_remote(self):
+        logger.info("The server begins to listen to the remote clients.")
+
         while True:
             msg = self.comm_manager.receive()
             self.msg_handlers[msg.msg_type](msg)
+
+            if msg.msg_type == 'finish':
+                break
 
             time.sleep(1)
 

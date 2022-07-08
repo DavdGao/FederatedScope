@@ -86,6 +86,7 @@ def load_csv(path, attrs):
     """
     # todo: optimize schema config format
     schema = parse_schema(attrs)
+    print(path)
     df = pd.read_csv(
         path,
         names=schema.names(),

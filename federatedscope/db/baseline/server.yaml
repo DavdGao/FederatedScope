@@ -1,4 +1,5 @@
 role: server
+local_query: True
 data:
   root: data
   type: csv

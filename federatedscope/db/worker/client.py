@@ -6,8 +6,6 @@ from federatedscope.db.processor.local_processor import LocalSQLProcessor
 from federatedscope.db.processor.external_processor import ExternalSQLProcessor
 from federatedscope.db.aggregator.aggregator import SQLAggregator
 from federatedscope.db.scheduler.scheduler import SQLScheduler
-from federatedscope.db.interface import Interface
-import federatedscope.db.model.data_pb2 as datapb
 
 import logging
 
@@ -25,8 +23,6 @@ class Client(Worker):
         super(Client, self).__init__(ID, host, port, config)
 
         self.server_id = server_id
-
-        self.interface = Interface()
 
         self.sql_parser = SQLParser()
         self.sql_scheduler = SQLScheduler()
@@ -82,48 +78,11 @@ class Client(Worker):
             # Start a remote listener
             p_remote = Process(target=self.listen_remote)
             p_remote.start()
-            self.listen_remote()
 
-        if self._cfg.client.local_process:
+        if self._cfg.local_query:
             # Start a local listener
             # TODO: create a process and share interface among local/remote process
-            p_local = Process(target=self.listen_local)
-            p_local.start()
             self.listen_local()
-
-    def listen_local(self):
-        for statement in self.interface.get_input():
-            # Check if the statement is legal
-            if not self.sql_parser.check_syntax(statement):
-                continue
-            # Construct query
-            query = self.sql_parser.parse(statement)
-            # Construct schedule for the query
-            schedule_local, scheduler_remote = self.sql_scheduler.schedule(query)
-
-            # Process the sub-query locally
-            res_local = self.sql_processor_local.process(schedule_local)
-            # Send the schedule to the corresponding clients
-            self.sql_processor_external.send(scheduler_remote)
-
-            # Wait for collecting the results
-            while True:
-                # Process a remote result
-                sub_res_remote = self.queue_remote.get()
-                self.sql_processor_external.append(res_remote)
-                # Finish the remote sub-query
-                if self.sql_processor_external.isfinish():
-                    break
-
-            # Obtain the results from remote clients
-            res_remote = self.sql_processor_external.aggregate()
-            # Obtain the final results
-            res = self.sql_aggregator.aggregate(res_local, res_remote)
-            # Print in the terminal
-            self.interface.print(res)
-
-        # End the process
-        self.interface.end()
 
     def listen_remote(self):
         # Listen for query and result

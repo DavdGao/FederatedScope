@@ -4,6 +4,7 @@ global_cfg = CN()
 
 def init_global_cfg(cfg):
     cfg.role = ''
+    cfg.local_query = False
 
     # ------------------------------------------------------------------------ #
     # Dataset related options
@@ -33,7 +34,6 @@ def init_global_cfg(cfg):
     cfg.client.host = '0.0.0.0'
     cfg.client.port = 50050
     cfg.client.upload_data = False
-    cfg.client.local_process = False
 
     # ------------------------------------------------------------------------ #
     # Local-DP related options

@@ -5,8 +5,10 @@ enum Operator {
   REF = 0;
   LIT = 1;
   GE = 10;
-  LE = 11;
-  EQ = 12;
+  GEQ = 11;
+  LE = 12;
+  LEQ = 13;
+  EQ = 14;
   CNT = 100;
   SUM = 101;
   AVG = 102;
