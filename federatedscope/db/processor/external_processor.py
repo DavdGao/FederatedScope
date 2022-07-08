@@ -1,46 +1,40 @@
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
-from federatedscope.db.model.backup import SQLQuery
-from federatedscope.db.data.data import DataSet
+from federatedscope.db.model.sqlschedule import Query
+from federatedscope.db.model.sqlquery_pb2 import Operator
+from federatedscope.db.data.data import Table
+from federatedscope.db.model.data_pb2 import Schema
+from federatedscope.db.algorithm.hdtree import LDPHDTree
 
-
-import xxhash
-import random
-import math
-from sys import maxsize
 import numpy as np
-
+from google.protobuf import text_format
 
 class ExternalSQLProcessor(BasicSQLProcessor):
-    def __init__(self):
+    def mda_query(self, query, table, eps: float, fanout: int):
         """
+        process mda query on the specific ldp encoded table
 
         Args:
-            epsilon:
-            local_processor:
+            query (Query): the mda query plan, only supports one aggregate expression, and all where expressions are on sensitive attribtues
+            table (Table): the ldp encoded table, the last attribute is ldp report
+            eps (float): ldp parameter
+            fanout (int): hdtree parameter
         """
-        # TODO:
-        self.epsilon = None
-        self.g = 0 # int(round(math.exp(epsilon))) + 1
-        self.local_processor = None # local_processor
-        # equivalent replacement of OLH bound
-        # if < g / (e^\epsilon + g - 1) -> return a random value from [0, g - 1]
-        # else -> return true value
-        # self.p = float(self.g) / (math.exp(self.epsilon) + self.g - 1)
-
-    def query(self, query: SQLQuery):
-        local_result = self.local_processor.query(query)
-        perturbed_result = self.lho_perturb(
-            local_result, random.randint(0, maxsize))
-        return perturbed_result
-
-    def lho_perturb(self, dataset: DataSet, seed):
-        for i in range(len(dataset.rows)):
-            for j in range(len(dataset.rows[i])):
-                h = (xxhash.xxh32(
-                    str(dataset.rows[i][j]), seed=seed).intdigest() % self.g)
-                threshold = np.random.random_sample()
-                if threshold < self.p:
-                    dataset.rows[i][j] = random.randint(0, self.g)
-                else:
-                    dataset.rows[i][j] = h
-        return dataset
+        encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, Schema())
+        hdtree = LDPHDTree(encoded_schema.attributes, eps, fanout)
+        filters = query.get_range_predicate()
+        aggs = query.get_simple_agg()[0]
+        agg_attr = aggs[0]
+        agg_type = aggs[1]
+        agg_buffer = np.zeros(3)
+        (query_hd_layers, query_hd_intervals) = hdtree.get_query_layers(filters)
+        for i, row in table.data.iterrows():
+            agg_value = row[agg_attr]
+            hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
+        if agg_type == Operator.CNT:
+            return agg_buffer[0]
+        elif agg_type == Operator.SUM:
+            return agg_buffer[1]
+        elif agg_type == Operator.AVG:
+            return float(agg_buffer[1]) / agg_buffer[0]
+        else:
+            raise ValueError("unsupported aggregate function")

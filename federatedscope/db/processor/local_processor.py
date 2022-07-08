@@ -25,12 +25,20 @@ class LocalSQLProcessor(BasicSQLProcessor):
     def get_schema(self, table_name: str):
         return self.schemas[table_name]
 
-    def encode_table(self, table_name: str, eps: float, fanout: int):
-        if not self.has_table(table_name):
-            raise ValueError("table " + table_name + " not exists")
-        table = self.get_table(table_name)
-        hdtree = LDPHDTree(table, eps, fanout)
-        encoded_table = hdtree.encode_table()
+    def encode_table(self, table, eps: float, fanout: int):
+        """
+        encode table with hd tree
+
+        Args:
+            table (data.Table): table to be encoded
+            eps (float): ldp epsilon parameter
+            fanout (int): hdtree parameter
+
+        Returns:
+            (hdtree, encoded table)
+        """
+        hdtree = LDPHDTree(table.schema.sensitive_attrs(), eps, fanout)
+        encoded_table = hdtree.encode_table(table)
         return (hdtree, encoded_table)
 
     def mda_query(self, query, eps: float, fanout: int):
@@ -52,7 +60,7 @@ class LocalSQLProcessor(BasicSQLProcessor):
         agg_buffer = np.zeros(3)
         (query_hd_layers, query_hd_intervals) = hdtree.get_query_layers(filters)
         for i, row in table.data.iterrows():
-            agg_value = agg_values[agg_attr][i]
+            agg_value = row[agg_attr]
             hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
         if agg_type == querypb.Operator.CNT:
             return agg_buffer[0]
@@ -62,4 +70,3 @@ class LocalSQLProcessor(BasicSQLProcessor):
             return float(agg_buffer[1]) / agg_buffer[0]
         else:
             raise ValueError("unsupported aggregate function")
-

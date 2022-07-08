@@ -26,10 +26,11 @@ message Attribute {
   string name = 1;
   DataType type = 2;
   bool sensitive = 3;
-  bool has_range = 4;
-  Cell min_value = 5;
-  Cell max_value = 6;
-  Cell delta = 7;
+  bool primary = 4;
+  bool has_range = 5;
+  Cell min_value = 6;
+  Cell max_value = 7;
+  Cell delta = 8;
 }
 
 message Schema {

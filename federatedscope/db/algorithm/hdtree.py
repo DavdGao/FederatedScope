@@ -11,6 +11,7 @@ class RangeTree(object):
         self.range = None
         self.layer = None
         self.height = None
+        random.seed()
 
     @staticmethod
     def factory(min, max, delta, fanout):
@@ -60,7 +61,7 @@ class RangeTree(object):
         return ret
 
 class LDPHDTree(object):
-    def __init__(self, table, eps, fanout):
+    def __init__(self, sensitive_attrs, eps, fanout):
         """
         build range trees based on local table
         Args:
@@ -68,13 +69,12 @@ class LDPHDTree(object):
             eps (float): the epsilon parameter
             fanout (int): fanout of hd tree
         """
-        self.table = table
+        self.sensitive_attributes = sensitive_attrs
         self.fanout = fanout
         self.fo = LDPOLH(eps)
         self.build_range_trees()
 
     def build_range_trees(self):
-        self.sensitive_attributes = self.table.schema.sensitive_attrs()
         self.trees = {}
         self.tree_heights = {}
         for attr in self.sensitive_attributes:
@@ -116,24 +116,27 @@ class LDPHDTree(object):
         perturbed_value = self.fo.encodes(str(values))
         return str((report_layer, perturbed_value))
 
-    def encode_table(self):
+    def encode_table(self, table):
         # generate report for each row
         sensitive_attr_names = map(lambda attr : attr.name, self.sensitive_attributes)
+        encoded_schema = datapb.Schema()
+        encoded_schema.attributes.extend(self.sensitive_attributes)
         encoded_reports = []
-        for i, row in self.table.project(sensitive_attr_names).iterrows():
+        for i, row in table.project(sensitive_attr_names).iterrows():
             encoded_reports.append(self.encode_row(row))
 
         # get unsensitive part of table
-        unsensitive_attrs = self.table.schema.unsensitive_attrs()
+        unsensitive_attrs = table.schema.unsensitive_attrs()
         encoded_table = datapb.Table()
-        encoded_table.name = self.table.name
+        encoded_table.name = table.name
         encoded_table.data.schema.attributes.extend(unsensitive_attrs)
         report_attr = encoded_table.data.schema.attributes.add()
-        report_attr.name = "$report$"
+        
+        report_attr.name = str(encoded_schema)
         report_attr.type = datapb.DataType.STRING
         report_attr.sensitive = True
         unsensitive_attr_names = map(lambda attr : attr.name, unsensitive_attrs)
-        for i, row in self.table.project(unsensitive_attr_names).iterrows():
+        for i, row in table.project(unsensitive_attr_names).iterrows():
             rowpb = encoded_table.data.rows.rows.add()
             j = 0
             for cell in row:

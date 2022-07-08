@@ -40,7 +40,8 @@ def init_global_cfg(cfg):
     # ------------------------------------------------------------------------ #
     cfg.ldp = CN()
 
-    cfg.ldp.epsilon = 0.
+    cfg.ldp.epsilon = 1.0
+    cfg.ldp.fanout = 5
 
     # ------------------------------------------------------------------------ #
     # Distribute training related options

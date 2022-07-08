@@ -16,6 +16,7 @@ class LDPOLH(object):
         self._fq0 = (- 1.0 * self._q) / (self._p - self._q)
         self._fq1 = (1.0 - 1.0 * self._q) / (self._p - self._q)
         self._max_seed = 2147483647
+        random.seed()
 
     def encodes(self, value):
         """
