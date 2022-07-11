@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0esqlquery.proto\x1a\ndata.proto\"\x91\x01\n\nExpression\x12\x1b\n\x08operator\x18\x01 \x01(\x0e\x32\t.Operator\x12\x1d\n\x08\x63hildren\x18\x02 \x03(\x0b\x32\x0b.Expression\x12\x17\n\x04type\x18\x03 \x01(\x0e\x32\t.DataType\x12\x0b\n\x01i\x18\n \x01(\x03H\x00\x12\x0b\n\x01\x66\x18\x0b \x01(\x02H\x00\x12\x0b\n\x01s\x18\x0c \x01(\tH\x00\x42\x07\n\x05value\"\xa4\x01\n\rBasicSchedule\x12\x1f\n\nexp_select\x18\x01 \x03(\x0b\x32\x0b.Expression\x12\x12\n\ntable_name\x18\x02 \x01(\t\x12\x1e\n\texp_where\x18\x03 \x03(\x0b\x32\x0b.Expression\x12\x1c\n\x07\x65xp_agg\x18\x04 \x03(\x0b\x32\x0b.Expression\x12 \n\x08\x63hildren\x18\x05 \x03(\x0b\x32\x0e.BasicSchedule*O\n\x08Operator\x12\x07\n\x03REF\x10\x00\x12\x07\n\x03LIT\x10\x01\x12\x06\n\x02GE\x10\n\x12\x06\n\x02LE\x10\x0b\x12\x06\n\x02\x45Q\x10\x0c\x12\x07\n\x03\x43NT\x10\x64\x12\x07\n\x03SUM\x10\x65\x12\x07\n\x03\x41VG\x10\x66\x62\x06proto3')
+  serialized_pb=_b('\n\x0esqlquery.proto\x1a\ndata.proto\"\x91\x01\n\nExpression\x12\x1b\n\x08operator\x18\x01 \x01(\x0e\x32\t.Operator\x12\x1d\n\x08\x63hildren\x18\x02 \x03(\x0b\x32\x0b.Expression\x12\x17\n\x04type\x18\x03 \x01(\x0e\x32\t.DataType\x12\x0b\n\x01i\x18\n \x01(\x03H\x00\x12\x0b\n\x01\x66\x18\x0b \x01(\x02H\x00\x12\x0b\n\x01s\x18\x0c \x01(\tH\x00\x42\x07\n\x05value\"\xa4\x01\n\rBasicSchedule\x12\x1f\n\nexp_select\x18\x01 \x03(\x0b\x32\x0b.Expression\x12\x12\n\ntable_name\x18\x02 \x01(\t\x12\x1e\n\texp_where\x18\x03 \x03(\x0b\x32\x0b.Expression\x12\x1c\n\x07\x65xp_agg\x18\x04 \x03(\x0b\x32\x0b.Expression\x12 \n\x08\x63hildren\x18\x05 \x03(\x0b\x32\x0e.BasicSchedule*a\n\x08Operator\x12\x07\n\x03REF\x10\x00\x12\x07\n\x03LIT\x10\x01\x12\x06\n\x02GE\x10\n\x12\x06\n\x02GT\x10\x0b\x12\x06\n\x02LE\x10\x0c\x12\x06\n\x02LT\x10\r\x12\x06\n\x02\x45Q\x10\x0e\x12\t\n\x05\x43OUNT\x10\x64\x12\x07\n\x03SUM\x10\x65\x12\x07\n\x03\x41VG\x10\x66\x62\x06proto3')
   ,
   dependencies=[data__pb2.DESCRIPTOR,])
 
@@ -44,30 +44,38 @@ _OPERATOR = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='LE', index=3, number=11,
+      name='GT', index=3, number=11,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='EQ', index=4, number=12,
+      name='LE', index=4, number=12,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='COUNT', index=5, number=100,
+      name='LT', index=5, number=13,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='SUM', index=6, number=101,
+      name='EQ', index=6, number=14,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='AVG', index=7, number=102,
+      name='COUNT', index=7, number=100,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SUM', index=8, number=101,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='AVG', index=9, number=102,
       serialized_options=None,
       type=None),
   ],
   containing_type=None,
   serialized_options=None,
   serialized_start=345,
-  serialized_end=424,
+  serialized_end=442,
 )
 _sym_db.RegisterEnumDescriptor(_OPERATOR)
 
@@ -75,8 +83,10 @@ Operator = enum_type_wrapper.EnumTypeWrapper(_OPERATOR)
 REF = 0
 LIT = 1
 GE = 10
-LE = 11
-EQ = 12
+GT = 11
+LE = 12
+LT = 13
+EQ = 14
 COUNT = 100
 SUM = 101
 AVG = 102

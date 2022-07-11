@@ -9,6 +9,7 @@ import federatedscope.db.model.sqlquery_pb2 as querypb
 from multiprocessing import Process
 import logging
 import time
+from threading import Thread
 from google.protobuf import text_format
 
 logger = logging.getLogger(__name__)
@@ -22,9 +23,6 @@ class Server(Worker):
 
         self.join_in_client_num = 0
 
-
-
-        self.data_global = None
         self.join_key = self.data.schema.primary()
         self.generate_demo_query()
 
@@ -75,12 +73,14 @@ class Server(Worker):
         self.demo_query = Query(q)
 
     def run(self):
-        # listen to remote gRPC request
-        # p_remote = Process(target=self.listen_remote)
-        # p_remote.start()
-
-        if self._cfg.local_query:
-            self.listen_local()
+        interface = Thread(target=self.listen_local)
+        interface.start()
+        while True:
+            msg = self.comm_manager.receive()
+            self.msg_handlers[msg.msg_type](msg)
+            time.sleep(1)
+        # if self._cfg.local_query:
+        #     self.listen_local()
 
 
     def listen_remote(self):
