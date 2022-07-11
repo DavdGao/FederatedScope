@@ -9,7 +9,7 @@ enum Operator {
   LE = 12;
   LEQ = 13;
   EQ = 14;
-  CNT = 100;
+  COUNT = 100;
   SUM = 101;
   AVG = 102;
 }

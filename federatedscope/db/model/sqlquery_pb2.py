@@ -52,7 +52,7 @@ _OPERATOR = _descriptor.EnumDescriptor(
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='CNT', index=5, number=100,
+      name='COUNT', index=5, number=100,
       serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
@@ -77,7 +77,7 @@ LIT = 1
 GE = 10
 LE = 11
 EQ = 12
-CNT = 100
+COUNT = 100
 SUM = 101
 AVG = 102
 

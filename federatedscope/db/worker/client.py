@@ -24,11 +24,6 @@ class Client(Worker):
 
         self.server_id = server_id
 
-        self.sql_parser = SQLParser()
-        self.sql_scheduler = SQLScheduler()
-        self.sql_processor_local = LocalSQLProcessor()
-        self.sql_aggregator = SQLAggregator()
-
         # Pass and store the query result from remote client
         # Currently only consider a single query
         self.queue_remote = Queue

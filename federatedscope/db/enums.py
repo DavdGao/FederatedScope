@@ -1,40 +1,43 @@
 
 class KEYWORDS:
-    SELECT = 'SELECT',
+    SELECT = 'SELECT'
     FROM = 'FROM'
     WHERE = 'WHERE'
     GROUPBY = 'GROUPBY'
 
+from enum import Enum, EnumMeta
 
-class AGGREGATE_OPERATORS:
+
+class StrEnumMeta(EnumMeta):
+    def __contains__(cls, member):
+        if isinstance(member, Enum):
+            return isinstance(member, cls) and member._name_ in cls._member_map_
+        elif isinstance(member, str):
+            return member in cls._member_map_
+        else:
+            raise TypeError(
+                "unsupported operand type(s) for 'in': '%s' and '%s'" % (
+                    type(member).__qualname__, cls.__class__.__qualname__))
+
+    def keys(cls):
+        return cls._member_names_
+
+    def values(cls):
+        return list(cls._value2member_map_.keys())
+
+class AGGREGATE_OPERATORS(Enum, metaclass=StrEnumMeta):
     SUM = 'SUM'
     COUNT = 'COUNT'
     AVG = 'AVG'
 
-    def __contains__(self, item):
-        return item in [AGGREGATE_OPERATORS.SUM,
-                        AGGREGATE_OPERATORS.COUNT,
-                        AGGREGATE_OPERATORS.AVG]
 
+class COMPARE_OPERATORS(Enum, metaclass=StrEnumMeta):
+    EQ = '='
+    GE = '>'
+    LE = '<'
+    GEQ = '>='
+    LEQ = '<='
 
-class COMPARE_OPERATORS:
-    OPS = { 
-        'EQ': '=',
-        'GE': '>',
-        'LE': '<',
-        'GEQ': '>=',
-        'LEQ': '<='
-    }
-    
-    def __getattr__(self, item):
-        if item in COMPARE_OPERATORS.OPS:
-            return COMPARE_OPERATORS[item]
-        else:
-            return super(COMPARE_OPERATORS, self).__getattr__(item)
-
-    def __contains__(self, item):
-        return item in COMPARE_OPERATORS.OPS.values()
-
-    def get_str(self, op):
-        keys, values = COMPARE_OPERATORS.OPS.items()
-        return keys[list(values).index(op)]
+    @classmethod
+    def get_key(cls, op):
+        return cls._value2member_map_[op].name

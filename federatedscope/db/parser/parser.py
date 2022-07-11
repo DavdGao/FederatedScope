@@ -1,11 +1,18 @@
 from federatedscope.db.model.sqlquery_pb2 import BasicSchedule
 from federatedscope.db.enums import KEYWORDS, COMPARE_OPERATORS, AGGREGATE_OPERATORS
 import federatedscope.db.model.sqlquery_pb2 as querypb
+from federatedscope.db.model.sqlschedule import Query
 
 class Statement(object):
     def __init__(self, statement: str):
         self.index = 0
-        self.statement = statement.strip().split(' ')
+        self.statement = self.init_statement(statement)
+
+    def init_statement(self, statement: str):
+        # TODO: imporve to suit a more complex grammar
+        for operator in ['>', '<', '=', '>=', '<=']:
+            statement = statement.replace(operator, f' {operator} ')
+        return statement.replace('(', ' ').replace(')', '').strip().split(' ')
 
     def __len__(self):
         return len(self.statement)
@@ -26,10 +33,10 @@ class Statement(object):
 
     def step(self):
         self.index += 1
-        return self.statement[self.index]
+        return self.statement[self.index-1]
 
     def isFinish(self):
-        return self.index == len(self.statement)-1
+        return self.index >= len(self.statement)
 
     def isDigit(self, index=None):
         if index is None:
@@ -78,35 +85,38 @@ class SQLParser(object):
 
         query = BasicSchedule()
         statement = Statement(statement_str)
-        while statement.isFinish():
+        while not statement.isFinish():
             word = statement.step()
-            if word == KEYWORDS.SELECT:
+            if word.upper() == KEYWORDS.SELECT:
                 # Handle multi aggregate exps
-                while statement.get_next() in AGGREGATE_OPERATORS:
+                while statement.get_word().upper() in AGGREGATE_OPERATORS:
                     # Aggregated expression
                     word = statement.step()
                     # Build aggregation exp
                     agg = query.exp_agg.add()
-                    agg.operator = getattr(querypb.Operator, word.upper())
+                    # agg.operator = getattr(querypb.Operator, word.upper())
+                    agg.operator = getattr(querypb.Operator, 'CNT')
                     agg_attr = agg.children.add()
                     agg_attr.operator = querypb.Operator.REF
                     # Obtain attribute
                     attribute = statement.step()
                     agg_attr.s = attribute
-            elif word == KEYWORDS.FROM:
+            elif word.upper() == KEYWORDS.FROM:
                 query.table_name = statement.step()
-            elif word == KEYWORDS.WHERE:
+            elif word.upper() == KEYWORDS.WHERE:
                 # Handle multi boolean exps
-                while statement.get_word(delta=2) in COMPARE_OPERATORS:
+                # TODO: split expression into several exps
+                while statement.get_word(delta=1) in COMPARE_OPERATORS.values():
                     # TODO: suppose they are all triples
-                    left_attr = statement.step()
                     left_lit = statement.isDigit()
+                    left_attr = statement.step()
                     operator = statement.step()
-                    right_attr = statement.step()
                     right_lit = statement.isDigit()
+                    right_attr = statement.step()
+
 
                     exp_bool = query.exp_where.add()
-                    exp_bool.operator = getattr(querypb.Operator, COMPARE_OPERATORS.get_str(operator))
+                    exp_bool.operator = getattr(querypb.Operator, COMPARE_OPERATORS.get_key(operator))
 
                     attr = exp_bool.children.add()
                     attr.operator = querypb.Operator.LIT if left_lit else querypb.Operator.REF
@@ -118,7 +128,7 @@ class SQLParser(object):
             else:
                 raise RuntimeError(f"{statement.get_next()} not support.")
 
-        return query
+        return Query(query)
 
 
     def check_syntax(self, statement):

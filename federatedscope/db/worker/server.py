@@ -1,7 +1,5 @@
 from federatedscope.db.worker.base_worker import Worker
-from federatedscope.db.parser.parser import SQLParser
-from federatedscope.db.processor.external_processor import ExternalSQLProcessor
-from federatedscope.db.scheduler.scheduler import SQLScheduler
+
 from federatedscope.core.message import Message
 from federatedscope.db.worker.handler import HANDLER
 from federatedscope.db.data.data import Table
@@ -24,9 +22,7 @@ class Server(Worker):
 
         self.join_in_client_num = 0
 
-        self.sql_parser = SQLParser()
-        self.sql_scheduler = SQLScheduler()
-        self.sql_processor_external = ExternalSQLProcessor()
+
 
         self.data_global = None
         self.join_key = self.data.schema.primary()
