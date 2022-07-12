@@ -1,18 +1,23 @@
+from multiprocessing.sharedctypes import Value
 from federatedscope.db.model.sqlquery_pb2 import BasicSchedule
 from federatedscope.db.enums import KEYWORDS, COMPARE_OPERATORS, AGGREGATE_OPERATORS
 import federatedscope.db.model.sqlquery_pb2 as querypb
+import federatedscope.db.model.data_pb2 as datapb
 from federatedscope.db.model.sqlschedule import Query
 
+import re
 class Statement(object):
     def __init__(self, statement: str):
         self.index = 0
         self.statement = self.init_statement(statement)
 
     def init_statement(self, statement: str):
-        # TODO: imporve to suit a more complex grammar
-        for operator in ['>', '<', '=', '>=', '<=']:
+        # TODO: imporve to suit a more complex grammar, not support ['<', '>'] yet
+        for operator in ['>=', '<=']:
             statement = statement.replace(operator, f' {operator} ')
-        return statement.replace('(', ' ').replace(')', '').strip().split(' ')
+        statement = re.sub(r'[<>]([^=])', r' < \1', statement)
+        statement = re.sub(r'([^<>])=', r'\1 = ', statement)
+        return [ele for ele in statement.replace('(', ' ').replace(')', ' ').strip().split(' ') if ele]
 
     def __len__(self):
         return len(self.statement)
@@ -94,8 +99,7 @@ class SQLParser(object):
                     word = statement.step()
                     # Build aggregation exp
                     agg = query.exp_agg.add()
-                    # agg.operator = getattr(querypb.Operator, word.upper())
-                    agg.operator = getattr(querypb.Operator, 'CNT')
+                    agg.operator = getattr(querypb.Operator, word.upper())
                     agg_attr = agg.children.add()
                     agg_attr.operator = querypb.Operator.REF
                     # Obtain attribute
@@ -106,12 +110,11 @@ class SQLParser(object):
             elif word.upper() == KEYWORDS.WHERE:
                 # Handle multi boolean exps
                 # TODO: split expression into several exps
+                # NOTE: only support <reference> <operator> <literal> pattern
                 while statement.get_word(delta=1) in COMPARE_OPERATORS.values():
                     # TODO: suppose they are all triples
-                    left_lit = statement.isDigit()
                     left_attr = statement.step()
                     operator = statement.step()
-                    right_lit = statement.isDigit()
                     right_attr = statement.step()
 
 
@@ -119,15 +122,26 @@ class SQLParser(object):
                     exp_bool.operator = getattr(querypb.Operator, COMPARE_OPERATORS.get_key(operator))
 
                     attr = exp_bool.children.add()
-                    attr.operator = querypb.Operator.LIT if left_lit else querypb.Operator.REF
+                    attr.operator = querypb.Operator.REF
                     attr.s = left_attr
 
                     attr = exp_bool.children.add()
-                    attr.operator = querypb.Operator.REF if right_lit else querypb.Operator.REF
-                    attr.s = right_attr
+                    attr.operator = querypb.Operator.LIT
+                    try:
+                        attr.i = int(right_attr)
+                        attr.type = datapb.DataType.INT
+                    except ValueError:
+                        try:
+                            attr.f = float(right_attr)
+                            attr.type = datapb.DataType.FLOAT
+                        except ValueError:
+                            attr.type = datapb.DataType.STRING
+                            attr.s = right_attr.strip("'")
+                    if not statement.isFinish():
+                        statement.step() # skip AND
             else:
                 raise RuntimeError(f"{statement.get_next()} not support.")
-
+        print(str(query))
         return Query(query)
 
 

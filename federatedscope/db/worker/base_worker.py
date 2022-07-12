@@ -39,6 +39,7 @@ class Worker(object):
 
         # Load data
         self.data = get_data(self._cfg.data)
+        self.data_global = None
 
         if config.local_query:
             self.interface = Interface()
@@ -61,10 +62,12 @@ class Worker(object):
             # Construct query
             query = self.sql_parser.parse(statement)
             print(query)
-            res_local = self.sql_processor_local.mda_query(query, 1.01, 5)
-
-            # Print in the terminal
-            self.interface.print(res_local)
+            if self.data_global == None:
+                logger.info("Global table not exists.")
+            else:
+                res_local = self.sql_processor_external.mda_query(query, self.data_global, 1.01, 5)
+                # Print in the terminal
+                self.interface.print(res_local)
 
         logger.info("The server is waiting for input query.")
 

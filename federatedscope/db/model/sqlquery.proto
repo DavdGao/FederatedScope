@@ -2,16 +2,16 @@ syntax="proto3";
 import "data.proto";
 
 enum Operator {
-  REF = 0;
-  LIT = 1;
-  GE = 10;
-  GEQ = 11;
-  LE = 12;
-  LEQ = 13;
-  EQ = 14;
-  COUNT = 100;
-  SUM = 101;
-  AVG = 102;
+  REF = 0;  // reference of an attribute
+  LIT = 1;  // literal value
+  GE = 10;  // greater or equal
+  GT = 11;  // greater than
+  LE = 12;  // less or equal
+  LT = 13;  // less than
+  EQ = 14;  // equal
+  COUNT = 100; // count aggregation
+  SUM = 101;   // sum aggregation
+  AVG = 102;   // avg aggregation
 }
 
 message Expression{

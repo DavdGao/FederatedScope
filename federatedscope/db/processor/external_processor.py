@@ -30,7 +30,7 @@ class ExternalSQLProcessor(BasicSQLProcessor):
         for i, row in table.data.iterrows():
             agg_value = row[agg_attr]
             hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
-        if agg_type == Operator.CNT:
+        if agg_type == Operator.COUNT:
             return agg_buffer[0]
         elif agg_type == Operator.SUM:
             return agg_buffer[1]

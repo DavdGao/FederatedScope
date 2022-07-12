@@ -33,10 +33,10 @@ class AGGREGATE_OPERATORS(Enum, metaclass=StrEnumMeta):
 
 class COMPARE_OPERATORS(Enum, metaclass=StrEnumMeta):
     EQ = '='
-    GE = '>'
-    LE = '<'
-    GEQ = '>='
-    LEQ = '<='
+    GT = '>'
+    LT = '<'
+    GE = '>='
+    LE = '<='
 
     @classmethod
     def get_key(cls, op):
