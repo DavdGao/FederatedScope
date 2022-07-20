@@ -3,10 +3,7 @@ from federatedscope.db.worker.base_worker import Worker
 from federatedscope.core.message import Message
 from federatedscope.db.worker.handler import HANDLER
 from federatedscope.db.data.data import Table
-from federatedscope.db.model.sqlschedule import Query
 import federatedscope.db.model.data_pb2 as datapb
-import federatedscope.db.model.sqlquery_pb2 as querypb
-from multiprocessing import Process
 import logging
 import time
 from threading import Thread
@@ -24,53 +21,7 @@ class Server(Worker):
         self.join_in_client_num = 0
 
         self.join_key = self.data.schema.primary()
-        self.generate_demo_query()
 
-    def generate_demo_query(self):
-        q = querypb.BasicSchedule()
-        q.table_name = "server"
-        # SUM(purchase)
-        agg = q.exp_agg.add()
-        agg.operator = querypb.Operator.SUM # the aggregation type
-        agg_attr = agg.children.add()
-        agg_attr.operator = querypb.Operator.REF
-        agg_attr.s = "purchase"
-        # where expressions
-        # age >= 30 and age <= 40
-        fi = q.exp_where.add()
-        fi.operator = querypb.Operator.GE
-        attr = fi.children.add()
-        attr.operator = querypb.Operator.REF
-        attr.s = "age"
-        value = fi.children.add()
-        value.operator = querypb.Operator.LIT
-        value.i = 30
-        fi = q.exp_where.add()
-        fi.operator = querypb.Operator.LE
-        attr = fi.children.add()
-        attr.operator = querypb.Operator.REF
-        attr.s = "age"
-        value = fi.children.add()
-        value.operator = querypb.Operator.LIT
-        value.i = 40
-        # salary >= 50 and salary <= 150
-        fi = q.exp_where.add()
-        fi.operator = querypb.Operator.GE
-        attr = fi.children.add()
-        attr.operator = querypb.Operator.REF
-        attr.s = "salary"
-        value = fi.children.add()
-        value.operator = querypb.Operator.LIT
-        value.i = 50
-        fi = q.exp_where.add()
-        fi.operator = querypb.Operator.LE
-        attr = fi.children.add()
-        attr.operator = querypb.Operator.REF
-        attr.s = "salary"
-        value = fi.children.add()
-        value.operator = querypb.Operator.LIT
-        value.i = 150
-        self.demo_query = Query(q)
 
     def run(self):
         interface = Thread(target=self.listen_local)
@@ -79,8 +30,6 @@ class Server(Worker):
             msg = self.comm_manager.receive()
             self.msg_handlers[msg.msg_type](msg)
             time.sleep(1)
-        # if self._cfg.local_query:
-        #     self.listen_local()
 
 
     def listen_remote(self):
@@ -130,5 +79,3 @@ class Server(Worker):
             self.data_global = join_table
         else:
             self.data_global.concat(join_table)
-        print ("mda query SUM(purchase) where age >= 30 and age <= 40 and salary >= 50 and salary <= 150")
-        print (self.sql_processor_external.mda_query(self.demo_query, self.data_global, self._cfg.ldp.epsilon, self._cfg.ldp.fanout))

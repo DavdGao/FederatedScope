@@ -40,6 +40,8 @@ def init_global_cfg(cfg):
     # ------------------------------------------------------------------------ #
     cfg.ldp = CN()
 
+    cfg.ldp.use = True
+    cfg.ldp.type = 'mda'
     cfg.ldp.epsilon = 1.0
     cfg.ldp.fanout = 5
 

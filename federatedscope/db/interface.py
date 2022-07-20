@@ -8,9 +8,9 @@ class Interface(object):
     def get_input(self):
         tmp = ""
         # Main loop in the interface
-        print('get input')
+        print('Input your query')
         while True:
-            cmds = input(">").strip().split(";")
+            cmds = input("> ").strip().split(";")
             cmds[0] = " ".join([tmp, cmds[0]]).strip()
             tmp = cmds[-1]
             # Process the commands
