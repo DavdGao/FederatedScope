@@ -7,6 +7,7 @@ data:
 server:
   host: 0.0.0.0
   port: 50050
-ldp:
-  epsilon: 1.01
+processor:
+  type: mda
+  eps: 1.01
   fanout: 5

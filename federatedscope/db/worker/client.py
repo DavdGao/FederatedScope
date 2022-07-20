@@ -1,11 +1,6 @@
 from federatedscope.db.worker.base_worker import Worker
 from federatedscope.core.message import Message
 from multiprocessing import Process, Queue
-from federatedscope.db.parser.parser import SQLParser
-from federatedscope.db.processor.local_processor import LocalSQLProcessor
-from federatedscope.db.processor.external_processor import ExternalSQLProcessor
-from federatedscope.db.aggregator.aggregator import SQLAggregator
-from federatedscope.db.scheduler.scheduler import SQLScheduler
 
 import logging
 

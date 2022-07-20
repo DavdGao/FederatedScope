@@ -38,12 +38,9 @@ def init_global_cfg(cfg):
     # ------------------------------------------------------------------------ #
     # Local-DP related options
     # ------------------------------------------------------------------------ #
-    cfg.ldp = CN()
+    cfg.processor = CN(new_allowed=True)
 
-    cfg.ldp.use = True
-    cfg.ldp.type = 'mda'
-    cfg.ldp.epsilon = 1.0
-    cfg.ldp.fanout = 5
+    cfg.processor.type = 'general'
 
     # ------------------------------------------------------------------------ #
     # Distribute training related options

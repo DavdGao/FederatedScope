@@ -22,6 +22,8 @@ class Server(Worker):
 
         self.join_key = self.data.schema.primary()
 
+        self.data_global = None
+
 
     def run(self):
         interface = Thread(target=self.listen_local)
