@@ -1,6 +1,7 @@
 from federatedscope.core.communication import gRPCCommManager
 from federatedscope.db.parser.parser import SQLParser
-from federatedscope.db.auxiliaries.processor_builder import get_processor
+from federatedscope.db.processor.mda_processor import MdaProcessor
+from federatedscope.db.encryptor.mda_encryptor import MdaEncryptor
 from federatedscope.db.scheduler.scheduler import SQLScheduler
 from federatedscope.db.worker.handler import HANDLER
 from federatedscope.db.data.csv_accessor import get_data
@@ -27,8 +28,8 @@ class Worker(object):
         # SQL attribute
         self.sql_parser = SQLParser()
         self.sql_scheduler = SQLScheduler()
-        self.sql_processor_external = get_processor(self._cfg.processor.type)
-        self.sql_processor_local = get_processor(self._cfg.processor.type)
+        self.sql_processor = MdaProcessor()
+        self.encryptor = MdaEncryptor(self._cfg.processor.eps, self._cfg.processor.fanout)
 
         self.msg_handlers = dict()
         self._register_default_handlers()
@@ -64,8 +65,7 @@ class Worker(object):
             if self.data_global == None:
                 logger.info("Global table not exists.")
             else:
-                # TODO: why external here?
-                res_local = self.sql_processor_external.mda_query(query, self.data_global, 1.01, 5)
+                res_local = self.sql_processor.mda_query(query, self.data_global, 1.01, 5)
                 # Print in the terminal
                 self.interface.print(res_local)
 

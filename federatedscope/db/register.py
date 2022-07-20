@@ -11,7 +11,11 @@ def register(key, module, module_dict):
 
 
 processor_dict = {}
+encryptor_dict = {}
 
 
 def register_processor(key, module):
     register(key, module, processor_dict)
+
+def register_encryptor(key, module):
+    register(key, module, encryptor_dict)

@@ -44,8 +44,8 @@ class Client(Worker):
         """
         Upload encrypted data to the server
         """
-        logger.info(f"Send encrypted data to the server with epsilon={self._cfg.ldp.epsilon}, fanout={self._cfg.ldp.fanout}.")
-        (_, encoded_table) = self.sql_processor_local.encode_table(self.data, self._cfg.ldp.epsilon, self._cfg.ldp.fanout)
+        logger.info(f"Send encrypted data to the server with epsilon={self._cfg.processor.eps}, fanout={self._cfg.processor.fanout}.")
+        encoded_table = self.encryptor.encode_table(self.data)
         # todo: serialize into bytes to reduce storage space usage
         self.comm_manager.send(
             Message(msg_type=HANDLER.UPLOAD_DATA,
@@ -98,7 +98,7 @@ class Client(Worker):
         query = self.sql_parser.parse(statement)
         # Construct local schedule
         schedule_local, _ = self.sql_scheduler.schedule(query)
-        res_external = self.sql_processor_external.process(schedule_local)
+        res_external = self.sql_processor.process(schedule_local)
 
         self.comm_manager.send(
             Message(msg_type="",

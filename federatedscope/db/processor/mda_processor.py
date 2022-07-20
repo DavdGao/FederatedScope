@@ -52,9 +52,9 @@ class MdaProcessor(BasicSQLProcessor):
 
 
 def call_mda_processor(config):
-    if config.processor.type == "mda_processor":
+    if config.processor.type == "mda":
         processor = MdaProcessor()
         return processor
 
-
-register_processor('mda_processor', call_mda_processor)
+# todo: because no module import this file, this line is not executed
+register_processor('mda', call_mda_processor)

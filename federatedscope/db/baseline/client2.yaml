@@ -11,6 +11,7 @@ client:
   host: 0.0.0.0
   port: 50052
   upload_data: True
-ldp:
-  epsilon: 1.01
+processor:
+  type: mda
+  eps: 1.01
   fanout: 5

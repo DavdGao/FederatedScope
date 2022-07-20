@@ -1,4 +1,5 @@
 from federatedscope.db.algorithm.hdtree import LDPHDTree
+from federatedscope.db.register import register_encryptor
 
 
 class MdaEncryptor:
@@ -16,8 +17,17 @@ class MdaEncryptor:
             fanout (int): hdtree parameter
 
         Returns:
-            (hdtree, encoded table)
+            encoded table
         """
         hdtree = LDPHDTree(table.schema.sensitive_attrs(), self.eps, self.fanout)
+        # todo: avoid rebuilding hdtree every time
         encoded_table = hdtree.encode_table(table)
-        return hdtree, encoded_table
+        return encoded_table
+
+def call_mda_encryptor(config):
+    if config.processor.type == 'mda':
+        encryptor = MdaEncryptor(config.processor.eps, config.processor.fanout)
+        return encryptor
+
+
+register_encryptor('mda', call_mda_encryptor)
