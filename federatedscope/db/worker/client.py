@@ -9,9 +9,7 @@ from federatedscope.db.worker.handler import HANDLER
 logger = logging.getLogger(__name__)
 
 
-
 class Client(Worker):
-
     def __init__(self, ID, server_id, config):
         host = config.client.host
         port = config.client.port
@@ -42,7 +40,7 @@ class Client(Worker):
 
     def upload_data(self):
         """
-        Upload encrypted data to the server
+        Upload encrypted accessor to the server
         """
         logger.info(f"Send encrypted data to the server with epsilon={self._cfg.processor.eps}, fanout={self._cfg.processor.fanout}.")
         encoded_table = self.encryptor.encode_table(self.data)
@@ -51,8 +49,7 @@ class Client(Worker):
             Message(msg_type=HANDLER.UPLOAD_DATA,
                     sender=self.ID,
                     receiver=[self.server_id],
-                    content=str(encoded_table))
-        )
+                    content=str(encoded_table)))
 
     def run(self):
         """
@@ -61,7 +58,7 @@ class Client(Worker):
         # Join the federated network
         self.join_in()
 
-        # Upload data if permitted
+        # Upload accessor if permitted
         if self._cfg.client.upload_data:
             self.upload_data()
         else:
@@ -93,12 +90,10 @@ class Client(Worker):
         Returns:
 
         """
-        statement = message.content
-        # Construct query
-        query = self.sql_parser.parse(statement)
+        query = message.content
         # Construct local schedule
-        schedule_local, _ = self.sql_scheduler.schedule(query)
-        res_external = self.sql_processor.process(schedule_local)
+        res_external = self.sql_processor.execute(
+            query, self.sql_accessor.get_table())
 
         self.comm_manager.send(
             Message(msg_type="",
@@ -125,5 +120,6 @@ class Client(Worker):
     def callback_funcs_for_assign_client_id(self, message: Message):
         content = message.content
         self.ID = int(content)
-        self.interface.print('Client (address {}:{}) is assigned with #{:d}.'.format(
-            self.comm_manager.host, self.comm_manager.port, self.ID))
+        self.interface.print(
+            'Client (address {}:{}) is assigned with #{:d}.'.format(
+                self.comm_manager.host, self.comm_manager.port, self.ID))

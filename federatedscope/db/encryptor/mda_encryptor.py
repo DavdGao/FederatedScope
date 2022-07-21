@@ -12,15 +12,15 @@ class MdaEncryptor:
         encode table with hd tree
 
         Args:
-            table (data.Table): table to be encoded
+            table (accessor.Table): table to be encoded
             eps (float): ldp epsilon parameter
             fanout (int): hdtree parameter
 
         Returns:
             encoded table
         """
-        hdtree = LDPHDTree(table.schema.sensitive_attrs(), self.eps, self.fanout)
-        # todo: avoid rebuilding hdtree every time
+        hdtree = LDPHDTree(table.schema.sensitive_attrs(), self.eps,
+                           self.fanout)
         encoded_table = hdtree.encode_table(table)
         return encoded_table
 

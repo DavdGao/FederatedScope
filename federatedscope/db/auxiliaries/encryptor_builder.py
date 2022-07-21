@@ -1,7 +1,8 @@
-from federatedscope.db.register import encryptor_dict
-
-def get_encryptor(config):
-    for func in encryptor_dict.values():
-        encryptor = func(config)
-        if encryptor is not None:
-            return encryptor
+def get_encryptor(type, **kwargs):
+    if type is '':
+        return None
+    elif type == 'mda_encryptor':
+        from federatedscope.db.encryptor.mda_encryptor import MdaEncryptor
+        return MdaEncryptor(**kwargs)
+    else:
+        raise NotImplementedError(f"Encryptor {type} not implement.")

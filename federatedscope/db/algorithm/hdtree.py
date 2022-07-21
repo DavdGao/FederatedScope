@@ -1,9 +1,10 @@
-import federatedscope.db.data.data as data
+import federatedscope.db.accessor.data as data
 import federatedscope.db.model.data_pb2 as datapb
 from federatedscope.db.algorithm.ldp import LDPOLH
 
 import itertools
 import random
+
 
 class RangeTree(object):
     def __init__(self):
@@ -31,7 +32,8 @@ class RangeTree(object):
             while cur_min <= max:
                 if cur_max >= max:
                     cur_max = max
-                child = RangeTree().construct(cur_min, cur_max, layer + 1, delta, fanout)
+                child = RangeTree().construct(cur_min, cur_max, layer + 1,
+                                              delta, fanout)
                 if self.height < child.height + 1:
                     self.height = child.height + 1
                 self.children.append(child)
@@ -46,7 +48,7 @@ class RangeTree(object):
             if min <= child.range[0] <= max or min <= child.range[1] <= max:
                 ret += child.decompose_interval(min, max)
         return ret
-    
+
     def get_ranges(self, value):
         ret = [None] * self.height
         node = self
@@ -59,6 +61,7 @@ class RangeTree(object):
                     break
             node = next_node
         return ret
+
 
 class LDPHDTree(object):
     def __init__(self, sensitive_attrs, eps, fanout):
@@ -79,25 +82,33 @@ class LDPHDTree(object):
         self.tree_heights = {}
         for attr in self.sensitive_attributes:
             if attr.type == datapb.DataType.INT:
-                tree = RangeTree.factory(attr.min_value.i, attr.max_value.i, attr.delta.i, self.fanout)
+                tree = RangeTree.factory(attr.min_value.i, attr.max_value.i,
+                                         attr.delta.i, self.fanout)
                 self.trees[attr.name] = tree
                 self.tree_heights[attr.name] = tree.height
             elif attr.type == datapb.DataType.FLOAT:
-                tree = RangeTree.factory(attr.min_value.f, attr.max_value.f, attr.delta.f, self.fanout)
+                tree = RangeTree.factory(attr.min_value.f, attr.max_value.f,
+                                         attr.delta.f, self.fanout)
                 self.trees[attr.name] = tree
                 self.tree_heights[attr.name] = tree.height
             else:
                 self.trees[attr.name] = None
                 self.tree_heights[attr.name] = 2
-        layers = [range(self.tree_heights[attr.name]) for attr in self.sensitive_attributes]
-        self.hdnode_layers = [report_layer for report_layer in itertools.product(*layers)]
+        layers = [
+            range(self.tree_heights[attr.name])
+            for attr in self.sensitive_attributes
+        ]
+        self.hdnode_layers = [
+            report_layer for report_layer in itertools.product(*layers)
+        ]
 
     def decode(self, report, hd_layers, hd_intervals):
         (report_layers, report_value) = eval(report)
         result = 0
         for i, layer in enumerate(hd_layers):
             if report_layers == layer:
-                result += self.fo.decodes(report_value, hd_intervals[i]) * len(self.hdnode_layers)
+                result += self.fo.decodes(report_value, hd_intervals[i]) * len(
+                    self.hdnode_layers)
         return result
 
     def encode_row(self, row):
@@ -118,7 +129,8 @@ class LDPHDTree(object):
 
     def encode_table(self, table):
         # generate report for each row
-        sensitive_attr_names = map(lambda attr : attr.name, self.sensitive_attributes)
+        sensitive_attr_names = map(lambda attr: attr.name,
+                                   self.sensitive_attributes)
         encoded_schema = datapb.Schema()
         encoded_schema.attributes.extend(self.sensitive_attributes)
         encoded_reports = []
@@ -131,11 +143,11 @@ class LDPHDTree(object):
         encoded_table.name = table.name
         encoded_table.data.schema.attributes.extend(unsensitive_attrs)
         report_attr = encoded_table.data.schema.attributes.add()
-        
+
         report_attr.name = str(encoded_schema)
         report_attr.type = datapb.DataType.STRING
         report_attr.sensitive = True
-        unsensitive_attr_names = map(lambda attr : attr.name, unsensitive_attrs)
+        unsensitive_attr_names = map(lambda attr: attr.name, unsensitive_attrs)
         for i, row in table.project(unsensitive_attr_names).iterrows():
             rowpb = encoded_table.data.rows.rows.add()
             j = 0
@@ -158,13 +170,16 @@ class LDPHDTree(object):
         for i, attr in enumerate(self.sensitive_attributes):
             if attr.type == datapb.DataType.INT or attr.type == datapb.DataType.FLOAT:
                 if attr.name in filters:
-                    interval = (filters[attr.name]['min'], filters[attr.name]['max'])
+                    interval = (filters[attr.name]['min'],
+                                filters[attr.name]['max'])
                 else:
                     if attr.type == datapb.DataType.INT:
                         interval = (attr.min_value.i, attr.max_value.i)
                     else:
                         interval = (attr.min_value.f, attr.max_value.f)
-                attribute_constraints.append(self.trees[attr.name].decompose_interval(interval[0], interval[1]))
+                attribute_constraints.append(
+                    self.trees[attr.name].decompose_interval(
+                        interval[0], interval[1]))
             else:
                 if attr.name in filters:
                     str_value = (1, filters[attr.name]['min'])
@@ -184,7 +199,8 @@ class LDPHDTree(object):
             query_hd_intervals.append(hd_interval)
         return (query_hd_layers, query_hd_intervals)
 
-    def add(self, buffer, report, agg_value, query_hd_layers, query_hd_intervals):
+    def add(self, buffer, report, agg_value, query_hd_layers,
+            query_hd_intervals):
         result = self.decode(report, query_hd_layers, query_hd_intervals)
         buffer[0] += result
         buffer[1] += result * agg_value

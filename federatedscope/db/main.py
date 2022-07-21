@@ -23,9 +23,7 @@ if __name__ == '__main__':
     init_cfg.merge_from_list(args.opts)
 
     if init_cfg.role == "client":
-        worker = Client(ID=-1,
-                        server_id=0,
-                        config=init_cfg)
+        worker = Client(ID=-1, server_id=0, config=init_cfg)
     elif init_cfg.role == "server":
         worker = Server(ID=0, config=init_cfg)
 
