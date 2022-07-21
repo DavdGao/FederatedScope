@@ -35,7 +35,6 @@ class BasicAccessor(ABC):
         """
         pass
 
-    @abstractmethod
     def join(self):
         """Execute join in the corresponding DBMS
 
@@ -44,7 +43,6 @@ class BasicAccessor(ABC):
         """
         pass
 
-    @abstractmethod
     def query(self, query):
         """Execute query in the corresponding DBMS
 
@@ -52,6 +50,5 @@ class BasicAccessor(ABC):
 
         """
 
-    @abstractmethod
     def write_table(self, table):
         pass

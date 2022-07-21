@@ -20,8 +20,6 @@ class Server(Worker):
 
         self.join_in_client_num = 0
 
-        self.join_key = self.data.schema.primary()
-
         self.data_global = None
 
     def run(self):
@@ -69,10 +67,11 @@ class Server(Worker):
         sender, data = message.sender, message.content
         tablepb = text_format.Parse(data, datapb.Table())
         table = Table.from_pb(tablepb)
+        left_key = self.data_accessor.get_table().schema.primary()
         right_key = table.schema.primary()
-        join_table = self.data.join(table, self.join_key.name, right_key.name)
+        join_table = self.data_accessor.get_table().join(table, left_key.name, right_key.name)
         if self.data_global is None:
             self.data_global = join_table
-            self.sql_processor.prepare(self.data_global, self._cfg)
+            self.sql_processor.prepare(self.data_global)
         else:
             self.data_global.concat(join_table)

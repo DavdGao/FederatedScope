@@ -9,9 +9,9 @@ import numpy as np
 
 
 class MdaProcessor(BasicSQLProcessor):
-    def __init__(self, eps, fanout):
+    def __init__(self, epsilon, fanout):
         super(MdaProcessor, self).__init__()
-        self.eps = eps
+        self.eps = epsilon
         self.fanout = fanout
 
     def check(self):
@@ -22,7 +22,6 @@ class MdaProcessor(BasicSQLProcessor):
         encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, Schema())
         self.hd_tree = LDPHDTree(encoded_schema.attributes, self.eps, self.fanout)
 
-    # TODO: eps and fanout should be unchanged?
     def query(self, query, table):
         """
         query on local tables

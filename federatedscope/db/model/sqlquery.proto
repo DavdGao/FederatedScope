@@ -1,5 +1,5 @@
 syntax="proto3";
-import "accessor.proto";
+import "data.proto";
 
 enum Operator {
   REF = 0;  // reference of an attribute

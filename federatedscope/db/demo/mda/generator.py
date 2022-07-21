@@ -23,9 +23,9 @@ for i in range(record_num):
 
 df = pd.DataFrame(rows, columns=['id', 'activatetime', 'purchase', 'age', 'salary', 'state', 'os'])
 
-df.to_csv('dataset/dataset.csv', index=False, float_format="%.2f")
+df.to_csv('data/dataset.csv', index=False, float_format="%.2f")
 
-df[['id', 'activatetime', 'purchase']].to_csv('dataset/server.csv', index=False, float_format="%.2f")
+df[['id', 'activatetime', 'purchase']].to_csv('data/server.csv', index=False, float_format="%.2f")
 
 base = 0
 top = 0
@@ -33,4 +33,4 @@ cid = 0
 for part in part_size:
   top += part
   cid += 1
-  df[['id', 'age', 'salary', 'state', 'os']].iloc[base:top].to_csv('dataset/client%d.csv' % cid, index=False, float_format="%.2f")
+  df[['id', 'age', 'salary', 'state', 'os']].iloc[base:top].to_csv('data/client%d.csv' % cid, index=False, float_format="%.2f")

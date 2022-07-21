@@ -24,7 +24,6 @@ class Worker(object):
         # SQL attribute
         self.sql_parser = get_parser(**self._cfg.parser)
         # TODO: implement for distribute query
-        # self.sql_scheduler = SQLScheduler()
         self.sql_encryptor = get_encryptor(**self._cfg.encryptor)
         self.sql_processor = get_processor(**self._cfg.processor)
 
@@ -36,7 +35,7 @@ class Worker(object):
         self.comm_manager = gRPCCommManager(host=host, port=port, client_num=2)
 
         # Data accessor
-        self.sql_accessor = get_accessor(**self._cfg.accessor)
+        self.data_accessor = get_accessor(**self._cfg.data)
         self.data_global = None
 
         if config.local_query:
@@ -63,8 +62,8 @@ class Worker(object):
             if self.data_global == None:
                 logger.info("Global table not exists.")
             else:
-                res_local = self.sql_processor.execute(
-                    query, self.sql_accessor.get_table(), self._cfg)
+                res_local = self.sql_processor.query(
+                    query, self.data_global)
                 # Print in the terminal
                 self.interface.print(res_local)
 

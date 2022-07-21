@@ -12,10 +12,10 @@ def init_global_cfg(cfg):
     # ------------------------------------------------------------------------ #
     cfg.data = CN()
 
+    # todo: rename to accessor.url may be better
     cfg.data.root = ''
-    cfg.data.type = ''
     # If the `cfg.accessor.type` is csv, the user need to provide schema and types by config
-    cfg.data.primary_key = ''
+    cfg.data.type = ''
     cfg.data.schema = []
 
     # ------------------------------------------------------------------------ #
