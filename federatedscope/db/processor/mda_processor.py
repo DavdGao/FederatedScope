@@ -1,3 +1,4 @@
+from mimetypes import init
 from federatedscope.db.processor.basic_processor import BasicSQLProcessor
 from federatedscope.db.model.data_pb2 import Schema
 from federatedscope.db.model.sqlquery_pb2 import Operator
@@ -9,12 +10,20 @@ import numpy as np
 
 
 class MdaProcessor(BasicSQLProcessor):
+
+    def __init__(self):
+        self.hd_tree = None
+
     def check(self):
         # TODO: @xuchen, check if the query is a mda query
         pass
 
+    def prepare(self, table, config):
+        encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, Schema())
+        self.hd_tree = LDPHDTree(encoded_schema.attributes, config.processor.eps, config.processor.fanout)
+
     # TODO: eps and fanout should be unchanged?
-    def query(self, query, table, eps: float, fanout: int):
+    def query(self, query, table):
         """
         query on local tables
         Args:
@@ -22,10 +31,7 @@ class MdaProcessor(BasicSQLProcessor):
             eps (float): ldp epsilon parameter
             fanout (int): hdtree parameter
         """
-        encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, Schema())
 
-        # Build the LDPHDTree for each query
-        hdtree = LDPHDTree(encoded_schema.attributes, eps, fanout)
 
         filters = query.get_range_predicate()
 
@@ -34,11 +40,11 @@ class MdaProcessor(BasicSQLProcessor):
         agg_buffer = np.zeros(3)
 
         # Obtain the query layers in the hdtree
-        query_hd_layers, query_hd_intervals = hdtree.get_query_layers(filters)
+        query_hd_layers, query_hd_intervals = self.hd_tree.get_query_layers(filters)
         # TODO: @xuchen, add some comments here
         for i, row in table.data.iterrows():
             agg_value = row[agg_attr]
-            hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
+            self.hd_tree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
 
         # Obtain the aggregation result
         if agg_type == Operator.COUNT:

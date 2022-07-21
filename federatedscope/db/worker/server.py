@@ -79,5 +79,6 @@ class Server(Worker):
         join_table = self.data.join(table, self.join_key.name, right_key.name)
         if self.data_global is None:
             self.data_global = join_table
+            self.sql_processor.prepare(self.data_global, self._cfg)
         else:
             self.data_global.concat(join_table)

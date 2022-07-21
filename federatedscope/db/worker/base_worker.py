@@ -65,7 +65,7 @@ class Worker(object):
             if self.data_global == None:
                 logger.info("Global table not exists.")
             else:
-                res_local = self.sql_processor.mda_query(query, self.data_global, 1.01, 5)
+                res_local = self.sql_processor.query(query, self.data_global, self._cfg)
                 # Print in the terminal
                 self.interface.print(res_local)
 
