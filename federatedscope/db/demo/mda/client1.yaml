@@ -1,16 +1,20 @@
 role: client
 data:
-  root: data
+  root: accessor
   type: csv
-  # TODO: Please update the schema and types here
   schema: [{'name':'id','type':'int','primary':True},{'name':'age','type':'int','min':17,'max':81,'delta':1},{'name':'salary','type':'int','min':50,'max':90,'sensitive':True,'delta':10},{'name':'state','type':'string','sensitive':True},{'name':'os','type':'string','sensitive':True}]
 server:
   host: 0.0.0.0
   port: 50050
 client:
   host: 0.0.0.0
-  port: 50052
+  port: 50051
   upload_data: True
-ldp:
+processor:
+  type: mda_processor
+  epsilon: 1.01
+  fanout: 5
+encryptor:
+  type: mda_encryptor
   epsilon: 1.01
   fanout: 5

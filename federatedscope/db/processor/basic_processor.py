@@ -1,4 +1,4 @@
-import federatedscope.db.data.csv_accessor as data_accessor
+import federatedscope.db.accessor.csv_accessor as data_accessor
 
 
 class BasicSQLProcessor(object):
@@ -19,8 +19,8 @@ class BasicSQLProcessor(object):
     def get_schema(self, table_name: str):
         return self.schemas[table_name]
 
-    def query(self, query, **kwargs):
-        pass
+    # def execute(self, query, **kwargs):
+    #     pass
 
     def check(self, query):
         return True

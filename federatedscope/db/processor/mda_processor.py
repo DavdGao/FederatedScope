@@ -3,29 +3,35 @@ from federatedscope.db.model.data_pb2 import Schema
 from federatedscope.db.model.sqlquery_pb2 import Operator
 from google.protobuf import text_format
 from federatedscope.db.algorithm.hdtree import LDPHDTree
-from federatedscope.db.register import register_processor
 
 import numpy as np
 
 
 class MdaProcessor(BasicSQLProcessor):
+    def __init__(self, eps, fanout):
+        super(MdaProcessor, self).__init__()
+
+        self.eps = eps
+        self.fanout = fanout
+
     def check(self):
         # TODO: @xuchen, check if the query is a mda query
         pass
 
-    # TODO: eps and fanout should be unchanged?
-    def query(self, query, table, eps: float, fanout: int):
+    # TODO: we should replace table by accessor
+    def execute(self, query, table):
         """
         query on local tables
         Args:
             query (Query): query plan
-            eps (float): ldp epsilon parameter
-            fanout (int): hdtree parameter
+            table (Table): the table
         """
-        encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, Schema())
+        encoded_schema = text_format.Parse(
+            table.schema.schemapb.attributes[-1].name, Schema())
 
+        # TODO: @xuchen, maybe build in the __init__ function
         # Build the LDPHDTree for each query
-        hdtree = LDPHDTree(encoded_schema.attributes, eps, fanout)
+        hdtree = LDPHDTree(encoded_schema.attributes, self.eps, self.fanout)
 
         filters = query.get_range_predicate()
 
@@ -38,7 +44,8 @@ class MdaProcessor(BasicSQLProcessor):
         # TODO: @xuchen, add some comments here
         for i, row in table.data.iterrows():
             agg_value = row[agg_attr]
-            hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers, query_hd_intervals)
+            hdtree.add(agg_buffer, row[-1], agg_value, query_hd_layers,
+                       query_hd_intervals)
 
         # Obtain the aggregation result
         if agg_type == Operator.COUNT:
@@ -49,12 +56,3 @@ class MdaProcessor(BasicSQLProcessor):
             return float(agg_buffer[1]) / agg_buffer[0]
         else:
             raise ValueError("unsupported aggregate function")
-
-
-def call_mda_processor(config):
-    if config.processor.type == "mda_processor":
-        processor = MdaProcessor()
-        return processor
-
-
-register_processor('mda_processor', call_mda_processor)

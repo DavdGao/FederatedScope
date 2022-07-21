@@ -1,6 +1,7 @@
 import federatedscope.db.model.sqlquery_pb2 as querypb
 import federatedscope.db.model.data_pb2 as datapb
 
+
 class Query(object):
     def __init__(self, querypb):
         self.querypb = querypb
@@ -35,7 +36,8 @@ class Query(object):
         filters = {}
         for exp in where_exps:
             children = exp.children
-            if children[0].operator == querypb.Operator.REF and children[1].operator == querypb.Operator.LIT:
+            if children[0].operator == querypb.Operator.REF and children[
+                    1].operator == querypb.Operator.LIT:
                 attr = children[0].s
                 lit_type = children[1].type
                 if lit_type == datapb.DataType.INT:
