@@ -23,7 +23,6 @@ class Worker(object):
 
         # SQL attribute
         self.sql_parser = get_parser(**self._cfg.parser)
-        # TODO: implement for distribute query
         self.sql_encryptor = get_encryptor(**self._cfg.encryptor)
         self.sql_processor = get_processor(**self._cfg.processor)
 
@@ -35,6 +34,7 @@ class Worker(object):
         self.comm_manager = gRPCCommManager(host=host, port=port, client_num=2)
 
         # Data accessor
+        # todo: decouple data_accessor and data_global with dataset
         self.data_accessor = get_accessor(**self._cfg.data)
         self.data_global = None
 
@@ -61,11 +61,11 @@ class Worker(object):
                 continue
             # Construct query
             query = self.sql_parser.parse(statement)
-            print(query)
             if self.data_global == None:
                 logger.info("Global table not exists.")
             else:
                 try:
+                    self.sql_processor.check(query)
                     res_local = self.sql_processor.query(
                         query, self.data_global)
                     # Print in the terminal

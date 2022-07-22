@@ -133,7 +133,6 @@ class SQLParser(object):
                         statement.step()  # skip AND
             else:
                 raise RuntimeError(f"{statement.get_next()} not support.")
-        print(str(query))
         return Query(query)
 
     def check_syntax(self, statement):

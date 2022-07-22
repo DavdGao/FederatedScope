@@ -35,7 +35,7 @@ class MdaProcessor(BasicSQLProcessor):
         get range filters in predicate
         
         Returns:
-            list of (attribute name, (min_value, max_value))
+            dictionary { filter_name: { min: <min_value>, max: <max_value> } }
         """
         where_exps = query.querypb.exp_where
         filters = {}
@@ -81,12 +81,20 @@ class MdaProcessor(BasicSQLProcessor):
         return filters
 
     def check(self, query):
-        if len(self.get_simple_agg(query)) != 1:
-            raise ValueError("only supports one aggregate function")
-        self.get_range_predicate(query)
+        aggregates = self.get_simple_agg(query)
+        if len(aggregates) != 1:
+            raise ValueError("Only supports one aggregate function")
+        if aggregates[0][0] not in self.unsensitive_attributes:
+            raise ValueError("Only supports aggregation on unsensitive attribute")
+        filters = self.get_range_predicate(query)
+        for attr_name, _  in filters.items():
+            if attr_name not in self.sensitive_attributes:
+                raise ValueError("Only supports range filtering on sensitive attributes")
 
     def prepare(self, table):
         encoded_schema = text_format.Parse(table.schema.schemapb.attributes[-1].name, Schema())
+        self.sensitive_attributes = list(map(lambda attr: attr.name, encoded_schema.attributes))
+        self.unsensitive_attributes = table.schema.unsensitive_attrs_names()
         self.hd_tree = LDPHDTree(encoded_schema.attributes, self.eps, self.fanout)
 
     def query(self, query, table):

@@ -23,15 +23,11 @@ class Server(Worker):
         self.data_global = None
 
     def run(self):
-        interface = Thread(target=self.listen_local)
-        interface.start()
-        while True:
-            msg = self.comm_manager.receive()
-            self.msg_handlers[msg.msg_type](msg)
-            if interface.is_alive():
-                time.sleep(1)
-            else:
-                exit(0)
+        listener = Thread(target=self.listen_remote)
+        listener.setDaemon(True)
+        listener.start()
+        self.listen_local()
+
 
     def listen_remote(self):
         logger.info("The server begins to listen to the remote clients.")

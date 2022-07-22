@@ -1,6 +1,6 @@
 role: client
 data:
-  root: accessor
+  root: data
   type: csv
   # TODO: Please update the schema and types here
   schema: [{'name':'id','type':'int','primary':True},{'name':'age','type':'int','min':17,'max':81,'delta':1},{'name':'salary','type':'int','min':50,'max':90,'sensitive':True,'delta':10},{'name':'state','type':'string','sensitive':True},{'name':'os','type':'string'}]

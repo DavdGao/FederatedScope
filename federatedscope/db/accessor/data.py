@@ -32,6 +32,9 @@ class Schema(object):
     def sensitive_attr_names(self):
         return list(map(lambda attr: attr.name, self.sensitive_attrs()))
 
+    def unsensitive_attrs_names(self):
+        return list(map(lambda attr: attr.name, self.unsensitive_attrs()))
+
     def name(self, index):
         return self.schemapb.attributes[index]
 
@@ -47,21 +50,6 @@ class Schema(object):
 
     def to_pb(self):
         return self.schemapb
-
-
-# TODO: @xuchen, is this class useless? Maybe we should delete it
-class DataSet(object):
-    def __init__(self, schema, raw_data):
-        self.schema = schema
-        self.data = raw_data
-
-    def to_pb(self):
-        return pandas_to_protocol(self.data, self.schema.to_pb())
-
-    @classmethod
-    def from_pb(datasetpb):
-        return DataSet(Schema(datasetpb.schema),
-                       protocol_to_pandas(datasetpb.schema, datasetpb.rows))
 
 
 # TODO: @xuchen: Does the class Table fit different DBMS, e.g. csv and mysql? Maybe we should move it into `federatedscope/db/model`

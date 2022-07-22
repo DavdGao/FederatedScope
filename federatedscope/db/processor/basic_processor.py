@@ -19,8 +19,8 @@ class BasicSQLProcessor(object):
     def get_schema(self, table_name: str):
         return self.schemas[table_name]
 
-    # def execute(self, query, **kwargs):
-    #     pass
+    def query(self, query, table):
+        pass
 
     def check(self, query):
         return True
