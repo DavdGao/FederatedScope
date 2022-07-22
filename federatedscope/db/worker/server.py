@@ -28,7 +28,10 @@ class Server(Worker):
         while True:
             msg = self.comm_manager.receive()
             self.msg_handlers[msg.msg_type](msg)
-            time.sleep(1)
+            if interface.is_alive():
+                time.sleep(1)
+            else:
+                exit(0)
 
     def listen_remote(self):
         logger.info("The server begins to listen to the remote clients.")

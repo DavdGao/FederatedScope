@@ -54,6 +54,9 @@ class Worker(object):
 
         for statement in self.interface.get_input():
             # Check if the statement is legal
+            if statement == "exit" or statement == "quit":
+                print("bye")
+                exit(0)
             if not self.sql_parser.check_syntax(statement):
                 continue
             # Construct query
@@ -62,10 +65,13 @@ class Worker(object):
             if self.data_global == None:
                 logger.info("Global table not exists.")
             else:
-                res_local = self.sql_processor.query(
-                    query, self.data_global)
-                # Print in the terminal
-                self.interface.print(res_local)
+                try:
+                    res_local = self.sql_processor.query(
+                        query, self.data_global)
+                    # Print in the terminal
+                    self.interface.print(res_local)
+                except ValueError as e:
+                    print("Error: " + str(e))
 
         logger.info("The server is waiting for input query.")
 
