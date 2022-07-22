@@ -14,7 +14,7 @@ class MdaProcessor(BasicSQLProcessor):
         self.eps = epsilon
         self.fanout = fanout
 
-    def check(self):
+    def check(self, query):
         # TODO: @xuchen, check if the query is a mda query
         pass
 
@@ -38,7 +38,7 @@ class MdaProcessor(BasicSQLProcessor):
 
         # Obtain the query layers in the hdtree
         query_hd_layers, query_hd_intervals = self.hd_tree.get_query_layers(filters)
-        # TODO: @xuchen, add some comments here
+        # decode each row using hdtree
         for i, row in table.data.iterrows():
             agg_value = row[agg_attr]
             self.hd_tree.add(agg_buffer, row[-1], agg_value, query_hd_layers,

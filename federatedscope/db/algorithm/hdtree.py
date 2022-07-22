@@ -169,14 +169,16 @@ class LDPHDTree(object):
         attribute_constraints = []
         for i, attr in enumerate(self.sensitive_attributes):
             if attr.type == datapb.DataType.INT or attr.type == datapb.DataType.FLOAT:
-                if attr.name in filters:
-                    interval = (filters[attr.name]['min'],
-                                filters[attr.name]['max'])
+                interval = None
+                if attr.type == datapb.DataType.INT:
+                    interval = [attr.min_value.i, attr.max_value.i]
                 else:
-                    if attr.type == datapb.DataType.INT:
-                        interval = (attr.min_value.i, attr.max_value.i)
-                    else:
-                        interval = (attr.min_value.f, attr.max_value.f)
+                    interval = [attr.min_value.f, attr.max_value.f]
+                if attr.name in filters:
+                    if 'min' in filters[attr.name]:
+                        interval[0] = filters[attr.name]['min']
+                    if 'max' in filters[attr.name]:
+                        interval[1] = filters[attr.name]['max']
                 attribute_constraints.append(
                     self.trees[attr.name].decompose_interval(
                         interval[0], interval[1]))
