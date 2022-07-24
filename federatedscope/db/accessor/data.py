@@ -9,7 +9,6 @@ class Schema(object):
     Arguments:
         schemapb: The protocol buffer Schema
     """
-
     def __init__(self, schemapb):
         self.schemapb = schemapb
 
@@ -23,23 +22,29 @@ class Schema(object):
         return self.schemapb.attributes
 
     def sensitive_attrs(self):
-        return list(filter(lambda attr : attr.sensitive, self.schemapb.attributes))
+        return list(
+            filter(lambda attr: attr.sensitive, self.schemapb.attributes))
 
     def unsensitive_attrs(self):
-        return list(filter(lambda attr : not attr.sensitive, self.schemapb.attributes))
+        return list(
+            filter(lambda attr: not attr.sensitive, self.schemapb.attributes))
 
     def sensitive_attr_names(self):
-        return list(map(lambda attr : attr.name, self.sensitive_attrs()))
+        return list(map(lambda attr: attr.name, self.sensitive_attrs()))
+
+    def unsensitive_attrs_names(self):
+        return list(map(lambda attr: attr.name, self.unsensitive_attrs()))
 
     def name(self, index):
         return self.schemapb.attributes[index]
 
     def primary(self):
-        primaries = list(filter(lambda attr : attr.primary, self.schemapb.attributes))
+        primaries = list(
+            filter(lambda attr: attr.primary, self.schemapb.attributes))
         if len(primaries) == 0:
-            raise ValueError("No primary key in data")
+            raise ValueError("No primary key in accessor")
         elif len(primaries) > 1:
-            raise ValueError("Mulitple primary key in data")
+            raise ValueError("Mulitple primary key in accessor")
         else:
             return primaries[0]
 
@@ -47,19 +52,7 @@ class Schema(object):
         return self.schemapb
 
 
-class DataSet(object):
-    def __init__(self, schema, raw_data):
-        self.schema = schema
-        self.data = raw_data
-
-    def to_pb(self):
-        return pandas_to_protocol(self.data, self.schema.to_pb())
-
-    @classmethod
-    def from_pb(datasetpb):
-        return DataSet(Schema(datasetpb.schema), protocol_to_pandas(datasetpb.schema, datasetpb.rows))
-
-
+# TODO: @xuchen: Does the class Table fit different DBMS, e.g. csv and mysql? Maybe we should move it into `federatedscope/db/model`
 class Table(object):
     def __init__(self, name, schema, raw_data):
         self.name = name
@@ -72,7 +65,12 @@ class Table(object):
     def join(self, table, left_key: str, right_key: str):
         left = self.data
         right = table.data
-        out_data = pd.merge(left, right, how='inner', left_on=left_key, right_on=right_key, suffixes=(False, '_r'))
+        out_data = pd.merge(left,
+                            right,
+                            how='inner',
+                            left_on=left_key,
+                            right_on=right_key,
+                            suffixes=(False, '_r'))
         out_schemapb = datapb.Schema()
         out_schemapb.attributes.extend(self.schema.schemapb.attributes)
         for attr in table.schema.schemapb.attributes:
@@ -100,7 +98,9 @@ class Table(object):
         return tablepb
 
     def from_pb(tablepb):
-        return Table(tablepb.name, Schema(tablepb.data.schema), protocol_to_pandas(tablepb.data.schema, tablepb.data.rows))
+        return Table(
+            tablepb.name, Schema(tablepb.data.schema),
+            protocol_to_pandas(tablepb.data.schema, tablepb.data.rows))
 
 
 def pandas_to_protocol(df, schemapb):

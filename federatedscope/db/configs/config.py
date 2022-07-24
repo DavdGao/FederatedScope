@@ -2,6 +2,7 @@ from yacs.config import CfgNode as CN
 
 global_cfg = CN()
 
+
 def init_global_cfg(cfg):
     cfg.role = ''
     cfg.local_query = False
@@ -11,10 +12,10 @@ def init_global_cfg(cfg):
     # ------------------------------------------------------------------------ #
     cfg.data = CN()
 
+    # todo: rename to accessor.url may be better
     cfg.data.root = ''
+    # If the `cfg.accessor.type` is csv, the user need to provide schema and types by config
     cfg.data.type = ''
-    # If the `cfg.data.type` is csv, the user need to provide schema and types by config
-    cfg.data.primary_key = ''
     cfg.data.schema = []
 
     # ------------------------------------------------------------------------ #
@@ -36,11 +37,25 @@ def init_global_cfg(cfg):
     cfg.client.upload_data = False
 
     # ------------------------------------------------------------------------ #
-    # Local-DP related options
+    # Processor related options
     # ------------------------------------------------------------------------ #
     cfg.processor = CN(new_allowed=True)
 
     cfg.processor.type = 'general'
+
+    # ------------------------------------------------------------------------ #
+    # Encryptor related options
+    # ------------------------------------------------------------------------ #
+    cfg.encryptor = CN(new_allowed=True)
+
+    cfg.encryptor.type = ''
+
+    # ------------------------------------------------------------------------ #
+    # Parser training related options
+    # ------------------------------------------------------------------------ #
+    cfg.parser = CN()
+
+    cfg.parser.type = ''
 
     # ------------------------------------------------------------------------ #
     # Distribute training related options

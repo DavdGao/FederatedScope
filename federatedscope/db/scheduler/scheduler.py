@@ -1,4 +1,4 @@
-
+# TODO: implement for distribute query
 class SQLScheduler(object):
     def __init__(self):
         pass

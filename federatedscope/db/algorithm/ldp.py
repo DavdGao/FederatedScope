@@ -2,8 +2,10 @@ import math
 import random
 import xxhash
 
+
 def hash(value, seed):
     return xxhash.xxh32(str(value), seed=seed).intdigest()
+
 
 class LDPOLH(object):
     def __init__(self, eps):
@@ -13,7 +15,7 @@ class LDPOLH(object):
         self._thres = float(self._g) / (self._exp + self._g - 1)
         self._p = self._exp / (self._exp + self._g - 1)
         self._q = 1.0 / self._g
-        self._fq0 = (- 1.0 * self._q) / (self._p - self._q)
+        self._fq0 = (-1.0 * self._q) / (self._p - self._q)
         self._fq1 = (1.0 - 1.0 * self._q) / (self._p - self._q)
         self._max_seed = 2147483647
         random.seed()
