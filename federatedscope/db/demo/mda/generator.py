@@ -23,6 +23,9 @@ for i in range(record_num):
 
 df = pd.DataFrame(rows, columns=['id', 'activatetime', 'purchase', 'age', 'salary', 'state', 'os'])
 
+import os
+print(f"Write data into {os.path.abspath('data/dataset.csv')}")
+
 df.to_csv('data/dataset.csv', index=False, float_format="%.2f")
 
 df[['id', 'activatetime', 'purchase']].to_csv('data/server.csv', index=False, float_format="%.2f")

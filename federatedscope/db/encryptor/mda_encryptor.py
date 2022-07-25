@@ -1,5 +1,4 @@
 from federatedscope.db.algorithm.hdtree import LDPHDTree
-from federatedscope.db.register import register_encryptor
 
 
 class MdaEncryptor:
