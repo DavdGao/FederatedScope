@@ -1,57 +1,13 @@
+from ast import keyword
 from federatedscope.db.model.sqlquery_pb2 import BasicSchedule
-from federatedscope.db.enums import KEYWORDS, COMPARE_OPERATORS, AGGREGATE_OPERATORS
+from federatedscope.db.enums import COMPARE_OPERATORS
 import federatedscope.db.model.sqlquery_pb2 as querypb
-import federatedscope.db.model.data_pb2 as datapb
 from federatedscope.db.model.sqlschedule import Query
 
 import re
-
-
-class Statement(object):
-    def __init__(self, statement: str):
-        self.index = 0
-        self.statement = self.init_statement(statement)
-
-    def init_statement(self, statement: str):
-        # TODO: imporve to suit a more complex grammar, not support ['<', '>'] yet
-        for operator in ['>=', '<=']:
-            statement = statement.replace(operator, f' {operator} ')
-        statement = re.sub(r'[<>]([^=])', r' < \1', statement)
-        statement = re.sub(r'([^<>])=', r'\1 = ', statement)
-        return [
-            ele for ele in statement.replace('(', ' ').replace(
-                ')', ' ').strip().split(' ') if ele
-        ]
-
-    def __len__(self):
-        return len(self.statement)
-
-    def get_last(self):
-        return self.statement[self.index - 1]
-
-    def get_word(self, index=None, delta=0):
-        if index is None:
-            index = self.index
-        try:
-            return self.statement[index + delta]
-        except IndexError:
-            return None
-
-    def get_next(self):
-        return self.statement[self.index + 1]
-
-    def step(self):
-        self.index += 1
-        return self.statement[self.index - 1]
-
-    def isFinish(self):
-        return self.index >= len(self.statement)
-
-    def isDigit(self, index=None):
-        if index is None:
-            index = self.index
-        return self.statement[index].isdigit()
-
+import sqlparse
+from sqlparse.sql import Function, Comparison, Where, Identifier
+from sqlparse.tokens import Token
 
 class SQLParser(object):
     KEYWORDS = [
@@ -60,7 +16,67 @@ class SQLParser(object):
         'SUM', 'JOIN'
     ]
 
-    COMPARE_OPERATORS = ['=', '>', '>=', '<', '<=']
+    CMP_REVERSE = { '=' : '=',
+                    '>': '<',
+                    '>=': '<=',
+                    '<' : '>',
+                    '<=' :'>='
+                }
+
+    def parse_literal(self, lit_token, lit_exp):
+        lit_exp.operator = querypb.Operator.LIT
+        if lit_token.ttype == Token.Literal.Number.Integer:
+            lit_exp.i = int(lit_token.value)
+        elif lit_token.ttype == Token.Literal.Number.Float:
+            lit_exp.f = float(lit_token.value)
+        elif lit_token.ttype == Token.Literal.String.Single:
+            lit_exp.s = lit_token.value.strip("'")
+        else:
+            raise ValueError("Unsupported literal type: ", str(lit_token))
+
+    def parse_func(self, func_token, func_exp):
+        params = func_token.get_parameters()
+        func_name = func_token.tokens[0].value
+        func_exp.operator = getattr(querypb.Operator, func_name.upper())
+        for para in params:
+            child = func_exp.children.add()
+            if isinstance(para, Identifier):
+                child.operator = querypb.Operator.REF
+                child.s = para.value
+            else:
+                self.parse_literal(para, child)
+
+    def parse_cmp(self, cmp, cmp_exp):
+        left = cmp_exp.children.add()
+        right = cmp_exp.children.add()
+        left_token = cmp.left
+        right_token = cmp.right
+        op = cmp.tokens[2].value
+        # reverse if identifier is at right
+        if isinstance(cmp.right, Identifier) and not isinstance(cmp.left, Identifier):
+            left_token = cmp.right
+            right_token = cmp.left
+            op = CMP_REVERSE[op]
+        left.operator = querypb.Operator.REF
+        left.s = left_token.value
+        self.parse_literal(right_token, right)
+        cmp_exp.operator = getattr(
+                    querypb.Operator, COMPARE_OPERATORS.get_key(op))
+
+    def parse_where(self, where_tokens):
+        where_exps = []
+        for token in where_tokens[2:]:
+            if token.is_whitespace:
+                continue
+            elif isinstance(token, Comparison):
+                filt = querypb.Expression()
+                self.parse_cmp(token, filt)
+                where_exps.append(filt)
+            elif token.value.lower() == 'and':
+                continue
+            else:
+                raise ValueError("unsupported operation in where clause: " + str(token.value))
+        return where_exps
 
     def parse(self, statement_str: str):
         """Parse the statement into SQL query
@@ -78,61 +94,52 @@ class SQLParser(object):
         Returns:
 
         """
-
+        tokens = sqlparse.parse(statement_str)
+        if len(tokens) == 0:
+            return
+        elif len(tokens[0].tokens) == 0:
+            return
+        elif tokens[0].tokens[0].normalized != 'SELECT':
+            raise ValueError("Unsupported query: " + statement_str)
+        tokens = tokens[0].tokens
         query = BasicSchedule()
-        statement = Statement(statement_str)
-        while not statement.isFinish():
-            word = statement.step()
-            if word.upper() == KEYWORDS.SELECT:
-                # Handle multi aggregate exps
-                while statement.get_word().upper() in AGGREGATE_OPERATORS:
-                    # Aggregated expression
-                    word = statement.step()
-                    # Build aggregation exp
-                    agg = query.exp_agg.add()
-                    agg.operator = getattr(querypb.Operator, word.upper())
-                    agg_attr = agg.children.add()
-                    agg_attr.operator = querypb.Operator.REF
-                    # Obtain attribute
-                    attribute = statement.step()
-                    agg_attr.s = attribute
-            elif word.upper() == KEYWORDS.FROM:
-                query.table_name = statement.step()
-            elif word.upper() == KEYWORDS.WHERE:
-                # Handle multi boolean exps
-                # TODO: split expression into several exps
-                # NOTE: only support <reference> <operator> <literal> pattern
-                while statement.get_word(
-                        delta=1) in COMPARE_OPERATORS.values():
-                    # TODO: suppose they are all triples
-                    left_attr = statement.step()
-                    operator = statement.step()
-                    right_attr = statement.step()
-
-                    exp_bool = query.exp_where.add()
-                    exp_bool.operator = getattr(
-                        querypb.Operator, COMPARE_OPERATORS.get_key(operator))
-
-                    attr = exp_bool.children.add()
-                    attr.operator = querypb.Operator.REF
-                    attr.s = left_attr
-
-                    attr = exp_bool.children.add()
-                    attr.operator = querypb.Operator.LIT
-                    try:
-                        attr.i = int(right_attr)
-                        attr.type = datapb.DataType.INT
-                    except ValueError:
-                        try:
-                            attr.f = float(right_attr)
-                            attr.type = datapb.DataType.FLOAT
-                        except ValueError:
-                            attr.type = datapb.DataType.STRING
-                            attr.s = right_attr.strip("'")
-                    if not statement.isFinish():
-                        statement.step()  # skip AND
+        out_tokens = []
+        idx = 0
+        from_idx = 0
+        for token in tokens[1:]:
+            idx += 1
+            if token.is_whitespace:
+                continue
+            elif token.is_keyword and token.normalized == 'FROM':
+                from_idx = idx
+                break
             else:
-                raise RuntimeError(f"{statement.get_next()} not support.")
+                out_tokens.append(token)
+
+        if len(tokens) <= from_idx + 2 or not isinstance(tokens[from_idx + 2], Identifier):
+            raise ValueError("Source table not found in FROM clause")
+        else:
+            query.table_name = tokens[from_idx + 2].value
+
+        for token in out_tokens:
+            if isinstance(token, Function):
+                agg = query.exp_agg.add()
+                self.parse_func(token, agg)
+            elif isinstance(token, Identifier):
+                sel = query.exp_select.add()
+                sel.operator = querypb.Operator.REF
+                sel.s = token.value
+            else:
+                raise ValueError("Unsupported operation in select clause")
+
+        for token in tokens[from_idx + 3:]:
+            if token.is_whitespace:
+                continue
+            elif isinstance(token, Where):
+                where_exps = self.parse_where(token)
+                query.exp_where.extend(where_exps)
+            else:
+                raise ValueError("Unsupported clause " + str(token))
         return Query(query)
 
     def check_syntax(self, statement):

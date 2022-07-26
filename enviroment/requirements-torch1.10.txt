@@ -12,5 +12,6 @@ tensorboard
 tensorboardX
 grpcio
 grpcio-tools
+sqlparser
 protobuf==3.19.4
 setuptools==61.2.0
