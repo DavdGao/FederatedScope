@@ -10,18 +10,14 @@ from sqlparse.sql import Function, Comparison, Where, Identifier
 from sqlparse.tokens import Token
 
 class SQLParser(object):
-    KEYWORDS = [
-        'SELECT', 'ALL', 'DISTINCT'
-        'FROM', 'WHERE', 'GROUPBY', 'COUNT', 'AVG'
-        'SUM', 'JOIN'
-    ]
 
-    CMP_REVERSE = { '=' : '=',
-                    '>': '<',
-                    '>=': '<=',
-                    '<' : '>',
-                    '<=' :'>='
-                }
+    def __init__(self):
+        self.CMP_REVERSE = { '=' : '=',
+                        '>': '<',
+                        '>=': '<=',
+                        '<' : '>',
+                        '<=' :'>='
+                    }
 
     def parse_literal(self, lit_token, lit_exp):
         lit_exp.operator = querypb.Operator.LIT
@@ -56,7 +52,7 @@ class SQLParser(object):
         if isinstance(cmp.right, Identifier) and not isinstance(cmp.left, Identifier):
             left_token = cmp.right
             right_token = cmp.left
-            op = CMP_REVERSE[op]
+            op = self.CMP_REVERSE[op]
         left.operator = querypb.Operator.REF
         left.s = left_token.value
         self.parse_literal(right_token, right)
