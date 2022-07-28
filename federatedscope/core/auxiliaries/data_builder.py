@@ -496,6 +496,8 @@ def load_external_data(config=None):
 
 
 def get_data(config):
+
+
     for func in register.data_dict.values():
         data_and_config = func(config)
         if data_and_config is not None:

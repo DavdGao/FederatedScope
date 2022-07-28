@@ -1,0 +1,17 @@
+role: client
+data:
+  root: data
+  type: csv
+  schema: [{'name':'value', 'type':'int'}]
+server:
+  host: 0.0.0.0
+  port: 50050
+client:
+  host: 0.0.0.0
+  port: 50052
+  upload_data: True
+processor:
+  type: standard_processor
+encryptor:
+  type: solh_encryptor
+  epsilon: 1.0

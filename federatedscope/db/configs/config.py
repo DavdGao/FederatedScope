@@ -37,6 +37,15 @@ def init_global_cfg(cfg):
     cfg.client.upload_data = False
 
     # ------------------------------------------------------------------------ #
+    # Shuffler related options
+    # ------------------------------------------------------------------------ #
+    cfg.shuffler = CN()
+
+    cfg.shuffler.host = '0.0.0.0'
+    cfg.shuffler.port = 50050
+    cfg.shuffler.upload_data = False
+
+    # ------------------------------------------------------------------------ #
     # Processor related options
     # ------------------------------------------------------------------------ #
     cfg.processor = CN(new_allowed=True)

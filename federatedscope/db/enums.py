@@ -4,6 +4,11 @@ class KEYWORDS:
     WHERE = 'WHERE'
     GROUPBY = 'GROUPBY'
 
+class ROLE:
+    SERVER = 'SERVER'
+    CLIENT = 'CLIENT'
+    SHUFFLER = 'SHUFFLER'
+
 
 from enum import Enum, EnumMeta
 

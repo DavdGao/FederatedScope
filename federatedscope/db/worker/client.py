@@ -1,6 +1,7 @@
 from federatedscope.db.worker.base_worker import Worker
 from federatedscope.core.message import Message
 from multiprocessing import Process, Queue
+from federatedscope.db.enums import ROLE
 
 import logging
 
@@ -14,6 +15,8 @@ class Client(Worker):
         host = config.client.host
         port = config.client.port
         super(Client, self).__init__(ID, host, port, config)
+
+        self.info['role'] = ROLE.CLIENT
 
         self.server_id = server_id
 
@@ -36,7 +39,7 @@ class Client(Worker):
             Message(msg_type=HANDLER.JOIN_IN,
                     sender=self.ID,
                     receiver=[self.server_id],
-                    content=self.local_address))
+                    content=self.info))
 
     def upload_data(self):
         """
@@ -117,7 +120,7 @@ class Client(Worker):
     def callback_funcs_for_update_network(self, message: Message):
         pass
 
-    def callback_funcs_for_assign_client_id(self, message: Message):
+    def callback_funcs_for_assign_id(self, message: Message):
         content = message.content
         self.ID = int(content)
         self.interface.print(

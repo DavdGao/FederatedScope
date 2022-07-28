@@ -1,3 +1,4 @@
+from federatedscope.db.enums import ROLE
 from federatedscope.db.worker.base_worker import Worker
 
 from federatedscope.core.message import Message
@@ -11,6 +12,15 @@ from google.protobuf import text_format
 
 logger = logging.getLogger(__name__)
 
+class RoleManager(dict):
+    def __init__(self):
+        super(RoleManager, self).__init__()
+
+        self.has_shuffler = False
+
+    def has_shuffler(self):
+        for v in self.values():
+            if v == ROLE.CLIENT
 
 class Server(Worker):
     def __init__(self, ID, config):
@@ -18,9 +28,11 @@ class Server(Worker):
         port = config.server.port
         super(Server, self).__init__(ID, host, port, config)
 
-        self.join_in_client_num = 0
+        self.info['role'] = ROLE.SERVER
 
         self.data_global = None
+
+        self.role_manager = dict()
 
     def run(self):
         listener = Thread(target=self.listen_remote)
@@ -28,6 +40,12 @@ class Server(Worker):
         listener.start()
         self.listen_local()
 
+    @property
+    def join_in_num(self, role):
+        return len(self.role_manager)
+
+    def join_in_role_num(self, role):
+        return len([_ for _ in self.role_manager.values() if _ == role])
 
     def listen_remote(self):
         logger.info("The server begins to listen to the remote clients.")
@@ -46,21 +64,28 @@ class Server(Worker):
         # self.terminate(msgt_type="finish")
 
     def callback_funcs_for_join_in(self, message: Message):
-        sender, address = message.sender, message.content
-        self.join_in_client_num += 1
-        sender = self.join_in_client_num
+        sender, info = message.sender, message.content
 
+        role, host, port = info['role'], info['host'], info['port']
+
+        sender = self.join_in_num + 1
         # Record the client in network topology
-        self.comm_manager.add_neighbors(neighbor_id=sender, address=address)
+        self.comm_manager.add_neighbors(neighbor_id=sender, address={'host': host, 'port': port})
+        # Record it in role manager
+        self.role_manager[sender] = info['role']
+
         # Assign the ID to the client
         logger.info(
-            "Register Client #{} ({}:{}) in the federated database.".format(
-                sender, address['host'], address['port']))
+            "Register {} #{} ({}:{}) in the federated database.".format(
+                role, sender, host, port))
+
+        #
+        content = {'ID': sender, 'host': }
         self.comm_manager.send(
-            Message(msg_type=HANDLER.ASSIGN_CLIENT_ID,
+            Message(msg_type=HANDLER.ASSIGN_ID,
                     sender=self.ID,
                     receiver=[sender],
-                    content=str(sender)))
+                    content=content))
 
     def callback_funcs_for_upload_data(self, message: Message):
         sender, data = message.sender, message.content
@@ -74,3 +99,5 @@ class Server(Worker):
             self.sql_processor.prepare(self.data_global)
         else:
             self.data_global.concat(join_table)
+
+

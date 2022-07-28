@@ -7,7 +7,10 @@ class HANDLER:
     UPLOAD_DATA = "upload_data"
 
     # Server
-    ASSIGN_CLIENT_ID = "assign_client_id"
+    ASSIGN_ID = "assign_id"
+
+    # Shuffler
+    ASSIGN_CLIENTS = 'assign_clients'
 
     @classmethod
     def register_new_handler(cls, name, value):
