@@ -18,9 +18,12 @@ class RoleManager(dict):
 
         self.has_shuffler = False
 
+    def get_shufflers(self):
+        return [k for k,v in self.items() if v == ROLE.SHUFFLER]
+
     def has_shuffler(self):
-        for v in self.values():
-            if v == ROLE.CLIENT
+        return ROLE.SHUFFLER in list(self.values())
+
 
 class Server(Worker):
     def __init__(self, ID, config):
@@ -32,7 +35,7 @@ class Server(Worker):
 
         self.data_global = None
 
-        self.role_manager = dict()
+        self.role_manager = RoleManager()
 
     def run(self):
         listener = Thread(target=self.listen_remote)
@@ -41,7 +44,7 @@ class Server(Worker):
         self.listen_local()
 
     @property
-    def join_in_num(self, role):
+    def join_in_num(self):
         return len(self.role_manager)
 
     def join_in_role_num(self, role):
@@ -72,15 +75,24 @@ class Server(Worker):
         # Record the client in network topology
         self.comm_manager.add_neighbors(neighbor_id=sender, address={'host': host, 'port': port})
         # Record it in role manager
-        self.role_manager[sender] = info['role']
+        self.role_manager[sender] = role
 
-        # Assign the ID to the client
+        # Assign the ID to the new participant
         logger.info(
             "Register {} #{} ({}:{}) in the federated database.".format(
                 role, sender, host, port))
 
-        #
-        content = {'ID': sender, 'host': }
+        if role == ROLE.CLIENT and self.role_manager.has_shuffler():
+            # TODO: support multiple shufflers
+            shuffler_id = self.role_manager.get_shufflers()[0]
+            # TODO: assign method
+            id_superior = shuffler_id
+            host_superior, port_superior = self.comm_manager.get_neighbors(shuffler_id).split(':')
+        else:
+            id_superior = self.ID
+            host_superior, port_superior = self.comm_manager.host, self.comm_manager.port
+        content = {'ID': sender, 'ID_superior': id_superior, 'host_superior': host_superior, 'port_superior': port_superior}
+
         self.comm_manager.send(
             Message(msg_type=HANDLER.ASSIGN_ID,
                     sender=self.ID,

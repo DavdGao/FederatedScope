@@ -19,6 +19,8 @@ class Client(Worker):
         self.info['role'] = ROLE.CLIENT
 
         self.server_id = server_id
+        # The default superior is server
+        self.superior_id = server_id
 
         # Pass and store the query result from remote client
         # Currently only consider a single query
@@ -51,7 +53,7 @@ class Client(Worker):
         self.comm_manager.send(
             Message(msg_type=HANDLER.UPLOAD_DATA,
                     sender=self.ID,
-                    receiver=[self.server_id],
+                    receiver=[self.superior_id],
                     content=str(encoded_table)))
 
     def run(self):
@@ -122,7 +124,14 @@ class Client(Worker):
 
     def callback_funcs_for_assign_id(self, message: Message):
         content = message.content
-        self.ID = int(content)
+        self.ID, self.superior_id, host, port = content['ID'], content['ID_superior'], content['host_superior'], content['port_superior']
         self.interface.print(
             'Client (address {}:{}) is assigned with #{:d}.'.format(
                 self.comm_manager.host, self.comm_manager.port, self.ID))
+
+        if self.superior_id != self.server_id:
+            # Add shuffler into server
+            self.comm_manager.add_neighbors(self.superior_id, f'{host}:{port}')
+            self.interface.print(
+                'Client is assign to the shuffler #{} ({}:{}).'.format(self.superior_id, host, port)
+            )
