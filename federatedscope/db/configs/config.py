@@ -18,6 +18,10 @@ def init_global_cfg(cfg):
     cfg.data.type = ''
     cfg.data.schema = []
 
+    cfg.dbms.user = ''
+    cfg.dbms.passwd = ''
+    cfg.dbms.database = ''
+
     # ------------------------------------------------------------------------ #
     # Server related options
     # ------------------------------------------------------------------------ #
