@@ -21,7 +21,13 @@ class MySqlAccessor(BasicAccessor):
     def get_schema(self, table_name):
         self.cursor.execute(f"describe {self.database}.{table_name};")
         # Parse into pb
-        print(self.cursor.fetchall())
+        # TODO: @xuchen, do we need to parse it into pb?
+        return self.cursor.fetchall()
+        for attr in self.cursor.fetchall():
+            name, type, null, key, default, extra = attr
+            # parse into pb
+        return None
+
 
 
     def get_table(self, table_name):
