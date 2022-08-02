@@ -76,6 +76,9 @@ class LDPOLH(object):
 
     def decode_table(self, table, attr_name: str, value):
         cnt = 0.0
-        for i, row in table.data.iterrows():
-            cnt += self.decodes(eval(row[attr_name]), str(value))
+        if attr_name in table.schema.sensitive_attr_names():
+            for i, row in table.data.iterrows():
+                cnt += self.decodes(eval(row[attr_name]), str(value))
+        else:
+            cnt = len(table.data[table.data[attr_name] == value])
         return cnt
