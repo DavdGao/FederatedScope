@@ -6,8 +6,8 @@ class BasicAccessor(ABC):
     """Accessor is used to connect DBMS and processor, the operations called by the processor will be translated into the standard operations of the corresponding DBMS
 
     """
-    def __init__(self, root):
-        self.root = root
+    def __init__(self):
+        pass
 
     @abstractmethod
     def connect(self):

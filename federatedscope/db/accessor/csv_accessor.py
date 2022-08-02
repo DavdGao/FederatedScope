@@ -12,7 +12,9 @@ class CsvAccessor(BasicAccessor):
 
     """
     def __init__(self, root, schema):
-        super(CsvAccessor, self).__init__(root)
+        super(CsvAccessor, self).__init__()
+
+        self.root = root
 
         # TODO: consider multiple tables in the future
         # Load schema from string
