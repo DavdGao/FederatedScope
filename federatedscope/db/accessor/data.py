@@ -134,12 +134,15 @@ def protocol_to_pandas(schemapb, rowspb):
         row = []
         i = 0
         for cellpb in rowpb.cells:
-            if schemapb.attributes[i].type == datapb.DataType.INT:
-                row.append(cellpb.i)
-            elif schemapb.attributes[i].type == datapb.DataType.FLOAT:
-                row.append(cellpb.f)
-            else:
+            if schemapb.attributes[i].sensitive:
                 row.append(cellpb.s)
+            else:
+                if schemapb.attributes[i].type == datapb.DataType.INT:
+                    row.append(cellpb.i)
+                elif schemapb.attributes[i].type == datapb.DataType.FLOAT:
+                    row.append(cellpb.f)
+                else:
+                    row.append(cellpb.s)
             i = i + 1
         rows.append(row)
     return pd.DataFrame(rows, columns=schema.names())
