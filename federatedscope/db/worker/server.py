@@ -16,13 +16,11 @@ class RoleManager(dict):
     def __init__(self):
         super(RoleManager, self).__init__()
 
-        self.has_shuffler = False
-
     def get_shufflers(self):
         return [k for k,v in self.items() if v == ROLE.SHUFFLER]
 
     def has_shuffler(self):
-        return ROLE.SHUFFLER in list(self.values())
+        return ROLE.SHUFFLER in self.values()
 
 
 class Server(Worker):
