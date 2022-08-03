@@ -90,6 +90,7 @@ class Server(Worker):
             id_superior = self.ID
             host_superior, port_superior = self.comm_manager.host, self.comm_manager.port
         content = {'ID': sender, 'ID_superior': id_superior, 'host_superior': host_superior, 'port_superior': port_superior}
+        logging.info("content {}".format(str(content)))
 
         self.comm_manager.send(
             Message(msg_type=HANDLER.ASSIGN_ID,
@@ -101,13 +102,14 @@ class Server(Worker):
         sender, data = message.sender, message.content
         tablepb = text_format.Parse(data, datapb.Table())
         table = Table.from_pb(tablepb)
-        left_key = self.data_accessor.get_table().schema.primary()
-        right_key = table.schema.primary()
-        join_table = self.data_accessor.get_table().join(table, left_key.name, right_key.name)
-        if self.data_global is None:
-            self.data_global = join_table
-            self.sql_processor.prepare(self.data_global)
+        if self._cfg.processor.type == 'mda_processor':
+            left_key = self.data_accessor.get_table().schema.primary()
+            right_key = table.schema.primary()
+            join_table = self.data_accessor.get_table().join(table, left_key.name, right_key.name)
+            if self.data_global is None:
+                self.data_global = join_table
+                self.sql_processor.prepare(self.data_global)
+            else:
+                self.data_global.concat(join_table)
         else:
-            self.data_global.concat(join_table)
-
-
+            self.data_global = table

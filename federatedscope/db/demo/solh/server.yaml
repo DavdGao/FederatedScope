@@ -8,7 +8,8 @@ server:
   host: 0.0.0.0
   port: 50050
 processor:
-  type: standard_processor
+  type: solh_processor
+  epsilon: 1.0
 encryptor:
   type: solh_encryptor
-  epsilon: 1
+  epsilon: 1.0

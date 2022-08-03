@@ -114,7 +114,9 @@ def pandas_to_protocol(df, schemapb):
         i = 0
         for attr in schemapb.attributes:
             cell = row.cells.add()
-            if attr.type == datapb.DataType.INT:
+            if attr.sensitive:
+                cell.s = data[i]
+            elif attr.type == datapb.DataType.INT:
                 cell.i = data[i]
             elif attr.type == datapb.DataType.FLOAT:
                 cell.f = data[i]
