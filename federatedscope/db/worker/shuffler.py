@@ -99,6 +99,7 @@ class Shuffler(Worker):
             self.data_global = table
         else:
             self.data_global.concat(table)
+        self.data_global.data.sample(frac=1).reset_index(drop=True)
         self.upload_data()
 
     def upload_data(self):

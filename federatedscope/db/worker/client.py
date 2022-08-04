@@ -142,4 +142,5 @@ class Client(Worker):
             })
         if self._cfg.client.upload_data:
             self.upload_data()
+        exit(0)
 
