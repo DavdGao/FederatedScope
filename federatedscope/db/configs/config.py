@@ -18,6 +18,12 @@ def init_global_cfg(cfg):
     cfg.data.type = ''
     cfg.data.schema = []
 
+    cfg.dbms = CN()
+
+    cfg.dbms.user = ''
+    cfg.dbms.passwd = ''
+    cfg.dbms.database = ''
+
     # ------------------------------------------------------------------------ #
     # Server related options
     # ------------------------------------------------------------------------ #
@@ -35,6 +41,15 @@ def init_global_cfg(cfg):
     cfg.client.host = '0.0.0.0'
     cfg.client.port = 50050
     cfg.client.upload_data = False
+
+    # ------------------------------------------------------------------------ #
+    # Shuffler related options
+    # ------------------------------------------------------------------------ #
+    cfg.shuffler = CN()
+
+    cfg.shuffler.host = '0.0.0.0'
+    cfg.shuffler.port = 50050
+    cfg.shuffler.upload_data = False
 
     # ------------------------------------------------------------------------ #
     # Processor related options

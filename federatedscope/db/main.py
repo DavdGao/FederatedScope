@@ -1,6 +1,8 @@
 import sys
 import os
 
+from federatedscope.db.worker.shuffler import Shuffler
+
 # TODO: modified it
 DEV_MODE = True  # simplify the federatedscope re-setup everytime we change the source codes of federatedscope
 if DEV_MODE:
@@ -26,5 +28,6 @@ if __name__ == '__main__':
         worker = Client(ID=-1, server_id=0, config=init_cfg)
     elif init_cfg.role == "server":
         worker = Server(ID=0, config=init_cfg)
-
+    elif init_cfg.role == "shuffler":
+        worker = Shuffler(ID=1, server_id=0, config=init_cfg)
     worker.run()

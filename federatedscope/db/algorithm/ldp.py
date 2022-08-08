@@ -2,6 +2,7 @@ import math
 import random
 import xxhash
 
+import federatedscope.db.model.data_pb2 as datapb
 
 def hash(value, seed):
     return xxhash.xxh32(str(value), seed=seed).intdigest()
@@ -50,3 +51,34 @@ class LDPOLH(object):
             return self._fq1
         else:
             return self._fq0
+
+    def encode_table(self, table):
+        unsensitive_attrs = table.schema.unsensitive_attrs()
+        sensitive_attrs = table.schema.sensitive_attrs()
+        encoded_table = datapb.Table()
+        encoded_table.name = table.name
+        encoded_table.data.schema.attributes.extend(table.schema.unsensitive_attrs())
+        encoded_table.data.schema.attributes.extend(table.schema.sensitive_attrs())
+        for i, row in table.data.iterrows():
+            rowpb = encoded_table.data.rows.rows.add()
+            for attr in unsensitive_attrs:
+                cellpb = rowpb.cells.add()
+                if attr.type == datapb.DataType.INT:
+                    cellpb.i = row[attr.name]
+                elif attr.type == datapb.DataType.FLOAT:
+                    cellpb.f = row[attr.name]
+                else:
+                    cellpb.s = row[attr.name]
+            for attr in sensitive_attrs:
+                cellpb = rowpb.cells.add()
+                cellpb.s = str(self.encodes(row[attr.name]))
+        return encoded_table
+
+    def decode_table(self, table, attr_name: str, value):
+        cnt = 0.0
+        if attr_name in table.schema.sensitive_attr_names():
+            for i, row in table.data.iterrows():
+                cnt += self.decodes(eval(row[attr_name]), str(value))
+        else:
+            cnt = len(table.data[table.data[attr_name] == value])
+        return cnt

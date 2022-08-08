@@ -19,7 +19,7 @@ class Worker(object):
     def __init__(self, ID, host, port, config=None):
         self._ID = ID
         self._cfg = config
-        self.local_address = {'host': host, 'port': port}
+        self.info = {'host': host, 'port': port}
 
         # SQL attribute
         self.sql_parser = get_parser(**self._cfg.parser)
