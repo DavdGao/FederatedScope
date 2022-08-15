@@ -6,7 +6,6 @@ from federatedscope.core.monitors import Monitor
 from federatedscope.core.trainers.context import CtxVar
 from federatedscope.mf.dataloader.dataloader import MFDataLoader
 from federatedscope.core.trainers import GeneralTorchTrainer
-from federatedscope.register import register_trainer
 
 import logging
 
@@ -111,12 +110,3 @@ class MFTrainer(GeneralTorchTrainer):
         # thus simply multiply the flops to avoid redundant forward
         self.ctx.monitor.total_flops += self.ctx.monitor.flops_per_sample * \
             ctx.batch_size
-
-
-def call_mf_trainer(trainer_type):
-    if trainer_type == "mftrainer":
-        trainer_builder = MFTrainer
-        return trainer_builder
-
-
-register_trainer("mftrainer", call_mf_trainer)

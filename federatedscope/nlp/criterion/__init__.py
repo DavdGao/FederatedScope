@@ -2,4 +2,4 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-from federatedscope.nlp.loss.character_loss import *
+from federatedscope.nlp.criterion.character_loss import *
