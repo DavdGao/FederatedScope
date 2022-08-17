@@ -2,7 +2,7 @@ from federatedscope.register import register_trainer
 from federatedscope.core.trainers.torch_trainer import GeneralTorchTrainer
 
 
-# Build your trainer here.
+# Build your trainers here.
 class MyTrainer(GeneralTorchTrainer):
     pass
 

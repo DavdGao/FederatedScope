@@ -197,7 +197,7 @@ class PassiveServer(Server):
         self.client_to_reconstruct = client_to_reconstruct
         self.reconstruct_data = dict()
 
-        # the loss function of the global model; the global model can be
+        # the criterions function of the global model; the global model can be
         # obtained in self.aggregator.model
         self.model_criterion = get_criterion(self._cfg.criterion.type,
                                              device=self.device)

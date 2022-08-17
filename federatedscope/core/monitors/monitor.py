@@ -290,7 +290,7 @@ class Monitor(object):
                         forms=None,
                         return_raw=False):
         """
-        format the evaluation results from trainer.ctx.eval_results
+        format the evaluation results from trainers.ctx.eval_results
 
         Args:
             results (dict): a dict to store the evaluation results {metric:
@@ -446,7 +446,7 @@ class Monitor(object):
     def track_model_size(self, models):
         """
             calculate the total model size given the models hold by the
-            worker/trainer
+            worker/trainers
 
         :param models: torch.nn.Module or list of torch.nn.Module
         :return:
@@ -493,7 +493,7 @@ class Monitor(object):
                            round_wise_update_key="val_loss"):
         """
             update best evaluation results.
-            by default, the update is based on validation loss with
+            by default, the update is based on validation criterions with
             `round_wise_update_key="val_loss" `
         """
         update_best_this_round = False
@@ -510,7 +510,7 @@ class Monitor(object):
             if round_wise_update_key is None:
                 for key in new_results:
                     cur_result = new_results[key]
-                    if 'loss' in key or 'std' in key:  # the smaller,
+                    if 'criterions' in key or 'std' in key:  # the smaller,
                         # the better
                         if results_type in [
                                 "client_best_individual",
@@ -539,14 +539,14 @@ class Monitor(object):
             # round_wise_update_key, update others at the same time
             else:
                 if round_wise_update_key not in [
-                        "val_loss", "test_loss", "loss", "val_avg_loss",
+                        "val_loss", "test_loss", "criterions", "val_avg_loss",
                         "test_avg_loss", "avg_loss", "test_acc", "test_std",
                         "val_acc", "val_std", "val_imp_ratio", "train_loss",
                         "train_avg_loss"
                 ]:
                     raise NotImplementedError(
                         f"We currently support round_wise_update_key as one "
-                        f"of ['val_loss', 'test_loss', 'loss', "
+                        f"of ['val_loss', 'test_loss', 'criterions', "
                         f"'val_avg_loss', 'test_avg_loss', 'avg_loss,"
                         f"''val_acc', 'val_std', 'test_acc', 'test_std', "
                         f"'val_imp_ratio'] for round-wise best results "
@@ -572,7 +572,7 @@ class Monitor(object):
                 for key in sorted_keys:
                     cur_result = new_results[key]
                     if update_best_this_round or \
-                            ('loss' in round_wise_update_key and 'loss' in
+                            ('criterions' in round_wise_update_key and 'criterions' in
                              key) or \
                             ('std' in round_wise_update_key and 'std' in key):
                         # The smaller the better

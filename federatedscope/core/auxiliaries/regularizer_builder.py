@@ -1,5 +1,5 @@
 from federatedscope.register import regularizer_dict
-from federatedscope.core.regularizer.proximal_regularizer import *
+from federatedscope.core.regularizers.proximal_regularizer import *
 try:
     from torch.nn import Module
 except ImportError:
@@ -20,7 +20,7 @@ def get_regularizer(type):
 
 
 class DummyRegularizer(Module):
-    """Dummy regularizer that only returns zero.
+    """Dummy regularizers that only returns zero.
 
     """
     def __init__(self):

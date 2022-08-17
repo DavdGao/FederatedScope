@@ -14,7 +14,7 @@ def wrap_nbafl_trainer(
         (https://ieeexplore.ieee.org/abstract/document/9069945/)
 
         Arguments:
-            mu: the factor of the regularizer
+            mu: the factor of the regularizers
             epsilon: the distinguishable bound
             w_clip: the threshold to clip weights
 
@@ -47,13 +47,13 @@ def wrap_nbafl_trainer(
 
 
 def init_nbafl_ctx(base_trainer):
-    """Set proximal regularizer, and the scale of gaussian noise
+    """Set proximal regularizers, and the scale of gaussian noise
 
     """
     ctx = base_trainer.ctx
     cfg = base_trainer.cfg
 
-    # set proximal regularizer
+    # set proximal regularizers
     cfg.defrost()
     cfg.regularizer.type = 'proximal_regularizer'
     cfg.regularizer.mu = cfg.nbafl.mu

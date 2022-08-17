@@ -93,7 +93,7 @@ def extend_fl_algo_cfg(cfg):
     # ---------------------------------------------------------------------- #
     cfg.flitplus = CN()
 
-    cfg.flitplus.tmpFed = 0.5  # gamma in focal loss (Eq.4)
+    cfg.flitplus.tmpFed = 0.5  # gamma in focal criterions (Eq.4)
     cfg.flitplus.lambdavat = 0.5  # lambda in phi (Eq.10)
     cfg.flitplus.factor_ema = 0.8  # beta in omega (Eq.12)
     cfg.flitplus.weightReg = 1.0  # balance lossLocalLabel and lossLocalVAT

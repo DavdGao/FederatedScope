@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from federatedscope.core.auxiliaries.enums import LIFECYCLE
 from federatedscope.core.trainers.context import CtxVar
-from federatedscope.gfl.loss.vat import VATLoss
+from federatedscope.gfl.criterions.vat import VATLoss
 from federatedscope.core.trainers.trainer import GeneralTorchTrainer
 
 

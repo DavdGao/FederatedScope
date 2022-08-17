@@ -27,9 +27,9 @@ command:
   - "3"
   - "expname_tag"
   - "+fedBN+finetune+fedOpt"
-  - "trainer.finetune.before_eval"
+  - "trainers.finetune.before_eval"
   - "True"
-  - "trainer.finetune.steps"
+  - "trainers.finetune.steps"
   - "5"
   - "personalization.local_param"
   - "['bn', 'norms']"  # FedBN

@@ -23,9 +23,9 @@ command:
   - "daoyuan"
   - "expname_tag"
   - "finetune"
-  - "trainer.finetune.before_eval"
+  - "trainers.finetune.before_eval"
   - "True"
-  - "trainer.finetune.steps"
+  - "trainers.finetune.steps"
   - "5"
   - ${args_no_hyphens}
 parameters:

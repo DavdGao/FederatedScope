@@ -57,7 +57,7 @@ class MyWorker(Worker):
         self._init_configs.append(config)
         self._perfs.append(float(res))
         time.sleep(self.sleep_interval)
-        return {'loss': float(res), 'info': res}
+        return {'criterions': float(res), 'info': res}
 
     def summarize(self):
         from federatedscope.autotune.utils import summarize_hpo_results

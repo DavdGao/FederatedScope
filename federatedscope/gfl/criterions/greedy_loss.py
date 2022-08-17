@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 def GreedyLoss(pred_feats, true_feats, pred_missing, true_missing, num_pred):
-    r"""Greedy loss is a loss function of cacluating the MSE loss for the feature.
+    r"""Greedy criterions is a criterions function of cacluating the MSE criterions for the feature.
     https://proceedings.neurips.cc//paper/2021/file/ \
     34adeb8e3242824038aa65460a47c29e-Paper.pdf
     Fedsageplus models from the "Subgraph Federated Learning with Missing
@@ -19,7 +19,7 @@ def GreedyLoss(pred_feats, true_feats, pred_missing, true_missing, num_pred):
         num_pred (int): hyperparameters which limit the maximum value of the \
         prediction
     :returns:
-        loss : the Greedy Loss
+        criterions : the Greedy Loss
     :rtype:
         torch.FloatTensor
     """

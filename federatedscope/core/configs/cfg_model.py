@@ -9,7 +9,7 @@ def extend_model_cfg(cfg):
     cfg.model = CN()
 
     cfg.model.model_num_per_trainer = 1  # some methods may leverage more
-    # than one model in each trainer
+    # than one model in each trainers
     cfg.model.type = 'lr'
     cfg.model.use_bias = True
     cfg.model.task = 'node'
@@ -32,7 +32,7 @@ def extend_model_cfg(cfg):
     cfg.criterion.type = 'MSELoss'
 
     # ---------------------------------------------------------------------- #
-    # regularizer related options
+    # regularizers related options
     # ---------------------------------------------------------------------- #
     cfg.regularizer = CN()
 

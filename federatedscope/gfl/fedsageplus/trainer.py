@@ -3,8 +3,8 @@ import copy
 import numpy as np
 import torch.nn.functional as F
 
-from federatedscope.gfl.loss import GreedyLoss
-from federatedscope.gfl.trainer.nodetrainer import NodeFullBatchTrainer
+from federatedscope.gfl.criterions import GreedyLoss
+from federatedscope.gfl.trainers.nodetrainer import NodeFullBatchTrainer
 
 
 class LocalGenTrainer(NodeFullBatchTrainer):

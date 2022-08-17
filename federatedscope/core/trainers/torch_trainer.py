@@ -160,8 +160,8 @@ class GeneralTorchTrainer(Trainer):
     def _hook_on_fit_start_calculate_model_size(self, ctx):
         if not isinstance(self.ctx.monitor, Monitor):
             logger.warning(
-                f"The trainer {type(self)} does contain a valid monitor, "
-                f"this may be caused by initializing trainer subclasses "
+                f"The trainers {type(self)} does contain a valid monitor, "
+                f"this may be caused by initializing trainers subclasses "
                 f"without passing a valid monitor instance."
                 f"Plz check whether this is you want.")
             return
@@ -215,8 +215,8 @@ class GeneralTorchTrainer(Trainer):
         """
         if not isinstance(self.ctx.monitor, Monitor):
             logger.warning(
-                f"The trainer {type(self)} does contain a valid monitor, "
-                f"this may be caused by initializing trainer subclasses "
+                f"The trainers {type(self)} does contain a valid monitor, "
+                f"this may be caused by initializing trainers subclasses "
                 f"without passing a valid monitor instance."
                 f"Plz check whether this is you want.")
             return
@@ -240,7 +240,7 @@ class GeneralTorchTrainer(Trainer):
             except:
                 logger.warning(
                     "current flop count implementation is for general "
-                    "trainer case: "
+                    "trainers case: "
                     "1) ctx.data_batch = [x, y]; and"
                     "2) the ctx.model takes only x as input."
                     "Please check the forward format or implement your own "

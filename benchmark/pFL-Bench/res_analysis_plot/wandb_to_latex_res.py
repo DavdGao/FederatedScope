@@ -507,10 +507,10 @@ def print_table_datasets_list(filters_each_line_table,
 
             remove_a_key(best_run_cfg, "cfg_check_funcs")
             old_run_header = run_header
-            if best_run_cfg["trainer"]["finetune"][
+            if best_run_cfg["trainers"]["finetune"][
                     "before_eval"] is True and "ft" not in run_header:
                 run_header = run_header + ",ft"
-            if best_run_cfg["trainer"]["finetune"][
+            if best_run_cfg["trainers"]["finetune"][
                     "before_eval"] is False and "ft" in run_header:
                 run_header = run_header.replace(",ft", "")
             if best_run_cfg["fedopt"][
@@ -622,7 +622,7 @@ def print_table_datasets_list(filters_each_line_table,
         res_to_print_matrix.append(res_to_print)
 
     colum_order_per_data = ["-", "-",
-                            "-"]  # for the loss, the smaller the better
+                            "-"]  # for the criterions, the smaller the better
     # "+" indicates the larger, the better
     rank_order = colum_order_per_data * len(filters_each_line_table)
     res_to_print_matrix = highlight_tex_res_in_table(res_to_print_matrix,
@@ -661,7 +661,7 @@ def print_table_datasets_list(filters_each_line_table,
     #    res_to_print = [sorted_method_name_to_print[key]] + res_to_print
     #    print(",".join(res_to_print))
     print(
-        "\n=============res_of_each_line [flops, communication, acc/loss]==============="
+        "\n=============res_of_each_line [flops, communication, acc/criterions]==============="
         + ",".join(list(filters_each_line_table.keys())))
     res_to_print_matrix = []
 
@@ -697,7 +697,7 @@ def print_table_datasets_list(filters_each_line_table,
         print("&".join(res_to_print) + "\\\\")
 
     print(
-        "\n=============res_of_each_line [converge_round, acc/loss]==============="
+        "\n=============res_of_each_line [converge_round, acc/criterions]==============="
         + ",".join(list(filters_each_line_table.keys())))
     res_to_print_matrix = []
     for key in sorted_method_name_to_print:

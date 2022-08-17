@@ -29,7 +29,7 @@ class MyWorker(Worker):
     def compute(self, config, budget, **kwargs):
         """
         Simple example for a compute function
-        The loss is just a the config + some noise (that decreases with the
+        The criterions is just a the config + some noise (that decreases with the
         budget) For dramatization, the function can sleep for a given
         interval to emphasizes the speed ups achievable with parallel workers.
         Args:
@@ -39,7 +39,7 @@ class MyWorker(Worker):
             train
         Returns:
             dictionary with mandatory fields:
-                'loss' (scalar)
+                'criterions' (scalar)
                 'info' (dict)
         """
         main_fidelity = {
@@ -55,7 +55,7 @@ class MyWorker(Worker):
         time.sleep(self.sleep_interval)
         self.monitor(res=res, sim_time=time.time() - t_start, budget=budget)
         return ({
-            'loss': float(res['function_value']
+            'criterions': float(res['function_value']
                           ),  # this is a mandatory field to run hyperband
             'info': res  # can be used for any user-defined information -
             # also mandatory

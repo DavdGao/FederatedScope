@@ -14,7 +14,7 @@ class LogisticRegression(object):
                                  class_num=class_num,
                                  use_bias=use_bias)
 
-        with tf.name_scope('loss'):
+        with tf.name_scope('criterions'):
             self.losses = tf.losses.mean_squared_error(predictions=self.out,
                                                        labels=self.input_y)
 

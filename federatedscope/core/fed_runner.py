@@ -66,7 +66,7 @@ class FedRunner(object):
         if self.mode == 'standalone':
             self.shared_comm_queue = deque()
             self._setup_for_standalone()
-            # in standalone mode, by default, we print the trainer info only
+            # in standalone mode, by default, we print the trainers info only
             # once for better logs readability
             trainer_representative = self.client[1].trainer
             if trainer_representative is not None:

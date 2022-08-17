@@ -19,14 +19,14 @@ class DLG(object):
         Args:
             - max_ite (int): the max iteration number;
             - lr (float): learning rate in optimization based reconstruction;
-            - federate_loss_fn (object): The loss function used in FL training;
+            - federate_loss_fn (object): The criterions function used in FL training;
             - device (str): the device running the reconstruction;
             - federate_method (str): The federated learning method;
             - federate_lr (float):The learning rate used in FL training;
             default None.
             - optim (str): The optimization method used in reconstruction;
             default: "Adam"; supported: 'sgd', 'adam', 'lbfgs'
-            - info_diff_type (str): The type of loss between the
+            - info_diff_type (str): The type of criterions between the
             ground-truth gradient/parameter updates info and the
             reconstructed info; default: "l2"
             - is_one_hot_label (bool): whether the label is one-hot;
@@ -227,19 +227,19 @@ class InvertGradient(DLG):
     Args:
             - max_ite (int): the max iteration number;
             - lr (float): learning rate in optimization based reconstruction;
-            - federate_loss_fn (object): The loss function used in FL training;
+            - federate_loss_fn (object): The criterions function used in FL training;
             - device (str): the device running the reconstruction;
             - federate_method (str): The federated learning method;
             - federate_lr (float): The learning rate used in FL training;
             default: None.
             - alpha_TV (float): the hyper-parameter of the total variance
             term; default: 0.001
-            - info_diff_type (str): The type of loss between the
+            - info_diff_type (str): The type of criterions between the
             ground-truth gradient/parameter updates info and the
             reconstructed info; default: "l2"
             - optim (str): The optimization method used in reconstruction;
             default: "Adam"; supported: 'sgd', 'adam', 'lbfgs'
-            - info_diff_type (str): The type of loss between the
+            - info_diff_type (str): The type of criterions between the
             ground-truth gradient/parameter updates info and the
             reconstructed info; default: "l2"
             - is_one_hot_label (bool): whether the label is one-hot;
@@ -268,7 +268,7 @@ class InvertGradient(DLG):
         self.alpha_TV = alpha_TV
         if self.info_diff_type != 'sim':
             logger.info(
-                'Force the info_diff_type to be cosine similarity loss in '
+                'Force the info_diff_type to be cosine similarity criterions in '
                 'InvertGradient attack method!')
             self.info_diff_type = 'sim'
             self.info_diff_loss = get_info_diff_loss(self.info_diff_type)

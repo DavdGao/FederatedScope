@@ -75,7 +75,7 @@ def get_mean_rank(traj_dict):
     from scipy.stats import rankdata
 
     xs = np.logspace(-4, 0, 500)
-    # Convert loss to rank
+    # Convert criterions to rank
     for repeat in traj_dict:
         logs = traj_dict[repeat]
         ys = []

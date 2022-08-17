@@ -1,12 +1,12 @@
 def wrap_attacker_trainer(base_trainer, config):
-    '''Wrap the trainer for attack client.
+    '''Wrap the trainers for attack client.
     Args:
-        base_trainer (core.trainers.GeneralTorchTrainer): the trainer that
+        base_trainer (core.trainers.GeneralTorchTrainer): the trainers that
         will be wrapped;
         config (federatedscope.core.configs.config.CN): the configure;
 
     :returns:
-        The wrapped trainer; Type: core.trainers.GeneralTorchTrainer
+        The wrapped trainers; Type: core.trainers.GeneralTorchTrainer
 
     '''
     if config.attack.attack_method.lower() == 'gan_attack':

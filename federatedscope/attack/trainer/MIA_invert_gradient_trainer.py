@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 def wrap_GradientAscentTrainer(
         base_trainer: Type[GeneralTorchTrainer]) -> Type[GeneralTorchTrainer]:
     '''
-    wrap the gradient_invert trainer
+    wrap the gradient_invert trainers
 
     Args:
         base_trainer: Type: core.trainers.GeneralTorchTrainer
 
     :returns:
-        The wrapped trainer; Type: core.trainers.GeneralTorchTrainer
+        The wrapped trainers; Type: core.trainers.GeneralTorchTrainer
 
     '''
 
@@ -56,7 +56,7 @@ def wrap_GradientAscentTrainer(
         trigger='on_fit_start',
         insert_mode=-1)
 
-    # plot the target data loss at the end of fitting
+    # plot the target data criterions at the end of fitting
 
     return base_trainer
 

@@ -36,7 +36,7 @@ def wrap_fedprox_trainer(
 
 
 def init_fedprox_ctx(base_trainer):
-    """Set proximal regularizer and the factor of regularizer
+    """Set proximal regularizers and the factor of regularizers
 
     """
     ctx = base_trainer.ctx

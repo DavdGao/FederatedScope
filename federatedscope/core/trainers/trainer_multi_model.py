@@ -23,13 +23,13 @@ class GeneralMultiModelTrainer(GeneralTorchTrainer):
 
             Arguments:
                 model_nums (int): how many internal models and optimizers
-                will be held by the trainer
+                will be held by the trainers
                 models_interact_mode (str): how the models interact, can be
                 "sequential" or "parallel".
                 model: training model
                 data: a dict contains train/val/test data
                 device: device to run
-                config: for trainer-related configuration
+                config: for trainers-related configuration
                 base_trainer: if given, the GeneralMultiModelTrainer init
                 will based on base_trainer copy
 
@@ -55,7 +55,7 @@ class GeneralMultiModelTrainer(GeneralTorchTrainer):
 
         """
         # support two initialization methods for the `GeneralMultiModelTrainer`
-        # 1) from another trainer; or 2) standard init manner given (model,
+        # 1) from another trainers; or 2) standard init manner given (model,
         # data, device, config)
         if base_trainer is None:
             assert model is not None and \

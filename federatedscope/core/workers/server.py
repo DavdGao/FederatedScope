@@ -102,7 +102,7 @@ class Server(Worker):
         ).fixedpoint2float if self._cfg.federate.use_ss else None
 
         if self._cfg.federate.make_global_eval:
-            # set up a trainer for conducting evaluation in server
+            # set up a trainers for conducting evaluation in server
             assert self.model is not None
             assert self.data is not None
             self.trainer = get_trainer(
@@ -112,11 +112,11 @@ class Server(Worker):
                 config=self._cfg,
                 only_for_eval=True,
                 monitor=self._monitor
-            )  # the trainer is only used for global evaluation
+            )  # the trainers is only used for global evaluation
             self.trainers = [self.trainer]
             if self.model_num > 1:
                 # By default, the evaluation is conducted by calling
-                # trainer[i].eval over all internal models
+                # trainers[i].eval over all internal models
                 self.trainers.extend([
                     copy.deepcopy(self.trainer)
                     for _ in range(self.model_num - 1)

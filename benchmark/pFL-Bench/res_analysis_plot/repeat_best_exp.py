@@ -371,7 +371,7 @@ def print_table_datasets_list(filters_each_line_table):
                     res_all_efficiency.append("-")
 
             old_run_header = run_header
-            if best_run_cfg["trainer"]["finetune"][
+            if best_run_cfg["trainers"]["finetune"][
                     "before_eval"] is True and "ft" not in run_header:
                 run_header = run_header + ",ft"
             elif best_run_cfg["fedopt"][

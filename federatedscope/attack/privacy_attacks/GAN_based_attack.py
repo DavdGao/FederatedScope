@@ -92,7 +92,7 @@ class GANCRA():
 
     def generator_loss(self, discriminator_output):
         '''
-        Get the generator loss based on the discriminator's output
+        Get the generator criterions based on the discriminator's output
 
         Args:
             discriminator_output (Tensor): the discriminator's output;
@@ -175,7 +175,7 @@ class GANCRA():
     def generate_and_save_images(self):
         '''
 
-        Save the generated data and the generator training loss
+        Save the generated data and the generator training criterions
 
         '''
 

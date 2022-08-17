@@ -63,7 +63,7 @@ class Client(Worker):
             config.federate.mode == 'standalone'
 
         # Build Trainer
-        # trainer might need configurations other than those of trainer node
+        # trainers might need configurations other than those of trainers node
         self.trainer = get_trainer(model=model,
                                    data=data,
                                    device=device,

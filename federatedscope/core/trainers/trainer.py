@@ -80,7 +80,7 @@ class Trainer(object):
         if self.cfg.federate.mode == 'distributed':
             self.print_trainer_meta_info()
         else:
-            # in standalone mode, by default, we print the trainer info only
+            # in standalone mode, by default, we print the trainers info only
             # once for better logs readability
             pass
 

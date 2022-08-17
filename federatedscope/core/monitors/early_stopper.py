@@ -5,7 +5,7 @@ import numpy as np
 # TODO: make this as a sub-module of monitor class
 class EarlyStopper(object):
     """
-        Track the history of metric (e.g., validation loss),
+        Track the history of metric (e.g., validation criterions),
         check whether should stop (training) process if the metric doesn't
         improve after a given patience.
     """

@@ -9,7 +9,7 @@ from federatedscope.core.workers.server import Server
 from federatedscope.core.workers.client import Client
 from federatedscope.core.auxiliaries.utils import merge_dict
 
-from federatedscope.gfl.trainer.nodetrainer import NodeMiniBatchTrainer
+from federatedscope.gfl.trainers.nodetrainer import NodeMiniBatchTrainer
 from federatedscope.gfl.model.fedsageplus import LocalSage_Plus, FedSage_Plus
 from federatedscope.gfl.fedsageplus.utils import GraphMender, HideGraph
 from federatedscope.gfl.fedsageplus.trainer import LocalGenTrainer, \
@@ -287,7 +287,7 @@ class FedSagePlusClient(Client):
             logger.info(f'\tClient #{self.ID} local pre-train @Epoch {i}.')
         # Build fedgen base on locgen
         self.fedgen = FedSage_Plus(self.gen)
-        # Build trainer for fedgen
+        # Build trainers for fedgen
         self.trainer_fedgen = FedGenTrainer(self.fedgen,
                                             self.hide_data,
                                             self.device,

@@ -26,13 +26,13 @@ class MetricCalculator(object):
         elif isinstance(eval_metric, list):
             eval_metric = set(eval_metric)
 
-        # Default metric is {'loss', 'avg_loss', 'total'}
+        # Default metric is {'criterions', 'avg_loss', 'total'}
         self.eval_metric = self.get_metric_funcs(eval_metric)
 
     def get_metric_funcs(self, eval_metric):
         metric_buildin = {
             metric: SUPPORT_METRICS[metric]
-            for metric in {'loss', 'avg_loss', 'total'} | eval_metric
+            for metric in {'criterions', 'avg_loss', 'total'} | eval_metric
             if metric in SUPPORT_METRICS
         }
         metric_register = get_metric(eval_metric - set(SUPPORT_METRICS.keys()))
@@ -227,7 +227,7 @@ def eval_imp_ratio(ctx, y_true, y_prob, y_pred, **kwargs):
 
 
 SUPPORT_METRICS = {
-    'loss': eval_loss,
+    'criterions': eval_loss,
     'avg_loss': eval_avg_loss,
     'total': eval_total,
     'correct': eval_correct,

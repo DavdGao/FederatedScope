@@ -10,13 +10,13 @@ logger = logging.getLogger(__name__)
 def wrap_GANTrainer(
         base_trainer: Type[GeneralTorchTrainer]) -> Type[GeneralTorchTrainer]:
     '''
-    Warp the trainer for gan_based class representative attack.
+    Warp the trainers for gan_based class representative attack.
 
     Args:
         base_trainer: Type: core.trainers.GeneralTorchTrainer
 
     :returns:
-        The wrapped trainer; Type: core.trainers.GeneralTorchTrainer
+        The wrapped trainers; Type: core.trainers.GeneralTorchTrainer
 
     '''
 
@@ -71,7 +71,7 @@ def hood_on_fit_start_generator(ctx):
 
 def hook_on_batch_forward_injected_data(ctx):
     '''
-    inject the generated data into training batch loss
+    inject the generated data into training batch criterions
     Args:
         ctx ():
 

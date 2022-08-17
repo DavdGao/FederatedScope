@@ -9,7 +9,7 @@ try:
     from federatedscope.contrib.trainer import *
 except ImportError as error:
     logger.warning(
-        f'{error} in `federatedscope.contrib.trainer`, some modules are not '
+        f'{error} in `federatedscope.contrib.trainers`, some modules are not '
         f'available.')
 
 TRAINER_CLASS_DICT = {
@@ -58,28 +58,28 @@ def get_trainer(model=None,
         return None
     elif config.trainer.type.lower() in TRAINER_CLASS_DICT:
         if config.trainer.type.lower() in ['cvtrainer']:
-            dict_path = "federatedscope.cv.trainer.trainer"
+            dict_path = "federatedscope.cv.trainers.trainers"
         elif config.trainer.type.lower() in ['nlptrainer']:
-            dict_path = "federatedscope.nlp.trainer.trainer"
+            dict_path = "federatedscope.nlp.trainers.trainers"
         elif config.trainer.type.lower() in [
                 'graphminibatch_trainer',
         ]:
-            dict_path = "federatedscope.gfl.trainer.graphtrainer"
+            dict_path = "federatedscope.gfl.trainers.graphtrainer"
         elif config.trainer.type.lower() in [
                 'linkfullbatch_trainer', 'linkminibatch_trainer'
         ]:
-            dict_path = "federatedscope.gfl.trainer.linktrainer"
+            dict_path = "federatedscope.gfl.trainers.linktrainer"
         elif config.trainer.type.lower() in [
                 'nodefullbatch_trainer', 'nodeminibatch_trainer'
         ]:
-            dict_path = "federatedscope.gfl.trainer.nodetrainer"
+            dict_path = "federatedscope.gfl.trainers.nodetrainer"
         elif config.trainer.type.lower() in [
                 'flitplustrainer', 'flittrainer', 'fedvattrainer',
                 'fedfocaltrainer'
         ]:
-            dict_path = "federatedscope.gfl.flitplus.trainer"
+            dict_path = "federatedscope.gfl.flitplus.trainers"
         elif config.trainer.type.lower() in ['mftrainer']:
-            dict_path = "federatedscope.mf.trainer.trainer"
+            dict_path = "federatedscope.mf.trainers.trainers"
         else:
             raise ValueError
 
@@ -92,7 +92,7 @@ def get_trainer(model=None,
                               only_for_eval=only_for_eval,
                               monitor=monitor)
     else:
-        # try to find user registered trainer
+        # try to find user registered trainers
         trainer = None
         for func in register.trainer_dict.values():
             trainer_cls = func(config.trainer.type)

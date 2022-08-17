@@ -84,7 +84,7 @@ class FedEMTrainer(GeneralMultiModelTrainer):
             new_hook=self.hook_on_batch_end_gather_loss,
             trigger="on_batch_end",
             insert_pos=0
-        )  # insert at the front, (we need gather the loss before clean it)
+        )  # insert at the front, (we need gather the criterions before clean it)
         self.register_hook_in_eval(
             new_hook=self.hook_on_batch_start_track_batch_idx,
             trigger="on_batch_start",

@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 def wrap_benignTrainer(
         base_trainer: Type[GeneralTorchTrainer]) -> Type[GeneralTorchTrainer]:
     '''
-    Warp the benign trainer for backdoor attack:
+    Warp the benign trainers for backdoor attack:
     We just add the normalization operation.
     Args:
         base_trainer: Type: core.trainers.GeneralTorchTrainer
     :returns:
-        The wrapped trainer; Type: core.trainers.GeneralTorchTrainer
+        The wrapped trainers; Type: core.trainers.GeneralTorchTrainer
     '''
     base_trainer.register_hook_in_eval(new_hook=hook_on_fit_end_test_poison,
                                        trigger='on_fit_end',

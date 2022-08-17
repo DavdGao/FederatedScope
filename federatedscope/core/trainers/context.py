@@ -198,14 +198,14 @@ class Context(LifecycleDict):
             if skip:
                 logger.warning(
                     f"No {target_split_name}_data or"
-                    f" {target_split_name}_loader in the trainer, "
+                    f" {target_split_name}_loader in the trainers, "
                     f"will skip evaluation"
                     f"If this is not the case you want, please check "
                     f"whether there is typo for the name")
                 return False
             else:
                 raise ValueError(f"No {target_split_name}_data or"
-                                 f" {target_split_name}_loader in the trainer")
+                                 f" {target_split_name}_loader in the trainers")
         else:
             return True
 
