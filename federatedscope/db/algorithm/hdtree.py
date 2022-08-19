@@ -74,6 +74,7 @@ class LDPHDTree(object):
         """
         self.sensitive_attributes = sensitive_attrs
         self.fanout = fanout
+        self.eps = eps
         self.fo = LDPOLH(eps)
         self.build_range_trees()
 
@@ -141,6 +142,10 @@ class LDPHDTree(object):
         unsensitive_attrs = table.schema.unsensitive_attrs()
         encoded_table = datapb.Table()
         encoded_table.name = table.name
+        encoded_table.config = str({
+            'eps': self.eps,
+            'fanout': self.fanout
+        })
         encoded_table.data.schema.attributes.extend(unsensitive_attrs)
         report_attr = encoded_table.data.schema.attributes.add()
 

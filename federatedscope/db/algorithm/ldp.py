@@ -57,6 +57,9 @@ class LDPOLH(object):
         sensitive_attrs = table.schema.sensitive_attrs()
         encoded_table = datapb.Table()
         encoded_table.name = table.name
+        encoded_table.config = str({
+            'eps': self._eps
+        })
         encoded_table.data.schema.attributes.extend(table.schema.unsensitive_attrs())
         encoded_table.data.schema.attributes.extend(table.schema.sensitive_attrs())
         for i, row in table.data.iterrows():

@@ -45,4 +45,5 @@ message DataSet {
 message Table {
   string name = 1;
   DataSet data = 2;
+  string config = 3;
 }
