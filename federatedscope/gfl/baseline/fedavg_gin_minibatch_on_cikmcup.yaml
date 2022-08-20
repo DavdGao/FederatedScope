@@ -1,35 +1,47 @@
 use_gpu: True
 device: 0
+data:
+  root: data/
+  type: cikmcup
+  batch_size: 64
+  shuffle: True
+  drop_last: False
 early_stop:
   patience: 20
   improve_indicator_mode: mean
   the_smaller_the_better: False
 federate:
   mode: 'standalone'
-  make_global_eval: False
-  total_round_num: 100
-  share_local_model: False
   client_num: 13
-data:
-  root: data/
-  type: cikmcup
-model:
-  type: gin
-  hidden: 64
+  total_round_num: 100
 personalization:
   local_param: ['encoder_atom', 'encoder', 'clf']
-train:
-  batch_or_epoch: epoch
-  local_update_steps: 1
-  optimizer:
-    weight_decay: 0.0005
-    type: SGD
 trainer:
   type: graphminibatch_trainer
+model:
+  type: gin
+  task: graph
+  use_bias: True
+  dropout: 0.5
+  hidden: 64
+grad:
+  grad_clip: 0.5
+train:
+  local_update_steps: 1
+  batch_or_epoch: epoch
+  optimizer:
+    type: SGD
+    lr: 0.1
+    weight_decay: 0.
 eval:
-  freq: 5
+  freq: 100
+  count_flops: False
   metrics: ['imp_ratio']
   report: ['avg']
-  best_res_update_round_wise_key: val_imp_ratio
-  count_flops: False
-  base: 0.
+  best_res_update_round_wise_key: val_avg_loss
+finetune:
+  before_eval: True
+  local_update_steps: 200
+  batch_or_epoch: epoch
+  optimizer:
+    lr: 0.01
