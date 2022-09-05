@@ -132,6 +132,8 @@ class Client(Worker):
                 'port': self.comm_manager.port
             }
 
+        self.consultation = None
+
     def _gen_timestamp(self, init_timestamp, instance_number):
         if init_timestamp is None:
             return None
@@ -175,8 +177,6 @@ class Client(Worker):
     def _register_default_handlers(self):
         self.register_handlers('assign_client_id',
                                self.callback_funcs_for_assign_id)
-        self.register_handlers('ask_for_join_in_info',
-                               self.callback_funcs_for_join_in_info)
         self.register_handlers('address', self.callback_funcs_for_address)
         self.register_handlers('model_para',
                                self.callback_funcs_for_model_para)
@@ -185,6 +185,9 @@ class Client(Worker):
         self.register_handlers('evaluate', self.callback_funcs_for_evaluate)
         self.register_handlers('finish', self.callback_funcs_for_finish)
         self.register_handlers('converged', self.callback_funcs_for_converged)
+        self.register_handlers('ask_for_join_in_info', self.callback_funcs_for_join_in_info)
+        self.register_handlers('consult_feedback', self.callback_funcs_for_consult_feedback)
+        self.register_handlers('consult_request', self.callback_funcs_for_consult_request)
 
     def join_in(self):
         """
@@ -392,7 +395,38 @@ class Client(Worker):
         logger.info('Client (address {}:{}) is assigned with #{:d}.'.format(
             self.comm_manager.host, self.comm_manager.port, self.ID))
 
-    def callback_funcs_for_join_in_info(self, message: Message):
+        self.trigger_for_consult()
+
+    def trigger_for_consult(self):
+        """
+        Ask for required information from the server or send end signal for consultation
+        """
+        if len(self._cfg.consult.required_by_client) != 0:
+            # ask for information from the server
+            msg_type, content = 'consult', self._cfg.consult.required_by_client
+        else:
+            # client doesn't require any information from the server
+            msg_type, content = 'consult_end', ''
+
+        self.comm_manager.send(
+            Message(msg_type=msg_type,
+                    sender=self.ID,
+                    receiver=[self.server_id],
+                    state=self.state,
+                    content=content)
+        )
+
+    def callback_funcs_for_consult_feedback(self, message: Message):
+        """
+        The handling function for receiving required information from the server
+        """
+        content = message.content
+
+        assert isinstance(content, dict), f'The type of information is {type(content)}, expect dict.'
+
+        self.consultation = content
+
+    def callback_funcs_for_consult_request(self, message: Message):
         """
         The handling function for receiving the request of join in information
         (such as batch_size, num_of_samples) during the joining process.
@@ -402,6 +436,7 @@ class Client(Worker):
         """
         requirements = message.content
         timestamp = message.timestamp
+
         join_in_info = dict()
         for requirement in requirements:
             if requirement.lower() == 'num_sample':
@@ -425,8 +460,9 @@ class Client(Worker):
                 raise ValueError(
                     'Fail to get the join in information with type {}'.format(
                         requirement))
+
         self.comm_manager.send(
-            Message(msg_type='join_in_info',
+            Message(msg_type='consult_feedback',
                     sender=self.ID,
                     receiver=[self.server_id],
                     state=self.state,

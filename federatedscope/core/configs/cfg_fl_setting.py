@@ -73,6 +73,18 @@ def extend_fl_setting_cfg(cfg):
     cfg.vertical.dims = [5, 10]
     cfg.vertical.key_size = 3072
 
+    # ---------------------------------------------------------------------- #
+    # Consult related options
+    # ---------------------------------------------------------------------- #
+    # The consultation is conducted before federated training. It allows the server
+    # and client to exchange some necessary information. For example, the
+    # server need to allocate some resource to the clients or collect some
+    # information from the clients. Similarly, the clients can also require
+    # for some information from the server.
+    cfg.consult = CN()
+    cfg.consult.required_by_server = [] # Specific what information is required by the server in consultation
+    cfg.consult.required_by_client = [] # Specific what information is required by the client in consultation
+
     # --------------- register corresponding check function ----------
     cfg.register_cfg_check_fun(assert_fl_setting_cfg)
 

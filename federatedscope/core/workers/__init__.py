@@ -6,5 +6,6 @@ from __future__ import with_statement
 from federatedscope.core.workers.base_worker import Worker
 from federatedscope.core.workers.server import Server
 from federatedscope.core.workers.client import Client
+from federatedscope.core.workers.client_manager import ClientManager
 
-__all__ = ['Worker', 'Server', 'Client']
+__all__ = ['Worker', 'Server', 'Client', 'ClientManager']

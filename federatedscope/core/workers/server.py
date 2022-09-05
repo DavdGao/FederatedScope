@@ -11,6 +11,7 @@ from federatedscope.core.message import Message
 from federatedscope.core.communication import StandaloneCommManager, \
     gRPCCommManager
 from federatedscope.core.workers import Worker
+from federatedscope.core.workers import ClientManager
 from federatedscope.core.auxiliaries.aggregator_builder import get_aggregator
 from federatedscope.core.auxiliaries.sampler_builder import get_sampler
 from federatedscope.core.auxiliaries.utils import merge_dict, Timeout, \
@@ -48,7 +49,7 @@ class Server(Worker):
                  total_round_num=10,
                  device='cpu',
                  strategy=None,
-                 unseen_clients_id=None,
+                 id_clients_unseen=None,
                  **kwargs):
 
         super(Server, self).__init__(ID, state, config, model, strategy)
@@ -123,32 +124,27 @@ class Server(Worker):
                 ])
 
         # Initialize the number of joined-in clients
+        self.client_manager = ClientManager(
+            client_num,
+            sample_strategy=self._cfg.federate.sampler,
+            id_client_unseen=id_clients_unseen)
+
         self._client_num = client_num
         self._total_round_num = total_round_num
         self.sample_client_num = int(self._cfg.federate.sample_client_num)
-        self.join_in_client_num = 0
-        self.join_in_info = dict()
+        # self.join_in_client_num = 0
+        # self.join_in_info = dict()
+
         # the unseen clients indicate the ones that do not contribute to FL
         # process by training on their local data and uploading their local
         # model update. The splitting is useful to check participation
         # generalization gap in
         # [ICLR'22, What Do We Mean by Generalization in Federated Learning?]
-        self.unseen_clients_id = [] if unseen_clients_id is None \
-            else unseen_clients_id
+        # self.unseen_clients_id = [] if unseen_clients_id is None \
+        #     else unseen_clients_id
 
         # Server state
         self.is_finish = False
-
-        # Sampler
-        if self._cfg.federate.sampler in ['uniform']:
-            self.sampler = get_sampler(
-                sample_strategy=self._cfg.federate.sampler,
-                client_num=self.client_num,
-                client_info=None)
-        else:
-            # Some type of sampler would be instantiated in trigger_for_start,
-            # since they need more information
-            self.sampler = None
 
         # Current Timestamp
         self.cur_timestamp = 0
@@ -222,6 +218,9 @@ class Server(Worker):
         self.register_handlers('join_in_info', self.callback_funcs_for_join_in)
         self.register_handlers('model_para', self.callback_funcs_model_para)
         self.register_handlers('metrics', self.callback_funcs_for_metrics)
+        self.register_handlers('consult_request', self.callback_funcs_for_consult_request)
+        self.register_handlers('consult_feedback', self.callback_funcs_for_consult_feedback)
+        self.register_handlers('consult_end', self.callback_funcs_for_consult_end)
 
     def run(self):
         """
@@ -742,52 +741,30 @@ class Server(Worker):
         """
         To check whether all the clients have joined in the FL course.
         """
-
-        if len(self._cfg.federate.join_in_info) != 0:
-            return len(self.join_in_info) == self.client_num
-        else:
-            return self.join_in_client_num == self.client_num
+        return self.join_in_client_num == self.client_num
 
     def trigger_for_start(self):
         """
-        To start the FL course when the expected number of clients have joined
+        To prepare and start the FL course when the stage of consultation is finished
         """
 
-        if self.check_client_join_in():
-            if self._cfg.federate.use_ss:
-                self.broadcast_client_address()
+        if self._cfg.federate.use_ss:
+            self.broadcast_client_address()
 
-            # get sampler
-            if 'client_resource' in self._cfg.federate.join_in_info:
-                client_resource = [
-                    self.join_in_info[client_index]['client_resource']
-                    for client_index in np.arange(1, self.client_num + 1)
-                ]
-            else:
-                model_size = sys.getsizeof(pickle.dumps(
-                    self.model)) / 1024.0 * 8.
-                client_resource = [
-                    model_size / float(x['communication']) +
-                    float(x['computation']) / 1000.
-                    for x in self.client_resource_info
-                ] if self.client_resource_info is not None else None
+        # Prepare for training
+        # init sampler within the client manager after finishing exchanging information
+        self.client_manager.init_sampler()
 
-            if self.sampler is None:
-                self.sampler = get_sampler(
-                    sample_strategy=self._cfg.federate.sampler,
-                    client_num=self.client_num,
-                    client_info=client_resource)
+        # change the deadline if the asyn.aggregator is `time up`
+        if self._cfg.asyn.use and self._cfg.asyn.aggregator == 'time_up':
+            self.deadline_for_cur_round = self.cur_timestamp + \
+                                           self._cfg.asyn.time_budget
 
-            # change the deadline if the asyn.aggregator is `time up`
-            if self._cfg.asyn.use and self._cfg.asyn.aggregator == 'time_up':
-                self.deadline_for_cur_round = self.cur_timestamp + \
-                                               self._cfg.asyn.time_budget
-
-            logger.info(
-                '----------- Starting training (Round #{:d}) -------------'.
-                format(self.state))
-            self.broadcast_model_para(msg_type='model_para',
-                                      sample_client_num=self.sample_client_num)
+        logger.info(
+            '----------- Starting training (Round #{:d}) -------------'.
+            format(self.state))
+        self.broadcast_model_para(msg_type='model_para',
+                                  sample_client_num=self.sample_client_num)
 
     def trigger_for_time_up(self, check_timestamp=None):
         """
@@ -959,7 +936,81 @@ class Server(Worker):
                             timestamp=self.cur_timestamp,
                             content=self._cfg.federate.join_in_info.copy()))
 
-        self.trigger_for_start()
+        self.trigger_for_consult()
+
+    def trigger_for_consult(self):
+        # Request clients to send required information
+        logger.info('----------- Starting to consult with clients for required information -------------')
+        if self._cfg.server:
+
+            receiver = list(self.comm_manager.neighbors.keys())
+            self.comm_manager.send(
+                Message(msg_type='',
+                        sender=self.ID,
+                        receiver=receiver,
+                        state=self.state,
+                        timestamp=self.cur_timestamp,
+                        content=['num_train'])
+            )
+
+    def callback_funcs_for_consult_request(self, message: Message):
+        """
+        Receive the request for information from the clients
+        """
+        sender, content = message.sender, message.content
+
+        # parse the request information
+        if not isinstance(content, dict):
+            raise TypeError(f"Type of content {type(content)} is wrong, expect dict.")
+
+        feedback = dict()
+        for key in message:
+            if key.lower() == 'total_round_num':
+                feedback[key] = self._cfg.federate.total_round_num
+            else:
+                logger.warning(f"Client #{sender} requests the wrong information {key}.")
+
+        # Send the feedback information
+        self.comm_manager.send(
+            Message(msg_type='consult_feedback',
+                    sender=self.ID,
+                    receiver=sender,
+                    state=self.state,
+                    content=feedback)
+        )
+
+    def callback_funcs_for_consult_feedback(self, message: Message):
+        """
+        Receive the information provided by client
+        """
+        sender, content = message.sender, message.content
+
+        if isinstance(content, dict):
+            self.client_manager.update_client_info(sender, content)
+        else:
+            raise TypeError(f"Type of content {type(content)} is wrong, expect dict.")
+
+        # check if we receive enough information from clients &&
+        # all clients finish requiring information from the server
+        if self.client_manager.check_client_info() and self.client_manager.check_client_consult():
+            logger.info(f"----------- Finish consultation ----------- ")
+            # Begin the training
+            self.trigger_for_start()
+
+    def callback_funcs_for_consult_end(self, message: Message):
+        """
+        Receive the end signal of the consultation from the clients
+        """
+        sender = message.sender
+
+        self.client_manager.finish_consult(sender)
+
+        # check if we receive enough information from clients &&
+        # all clients finish requiring information from the server
+        if self.client_manager.check_client_info() and self.client_manager.check_client_consult():
+            logger.info(f"----------- Finish consultation. ----------- ")
+            # Begin the training
+            self.trigger_for_start()
 
     def callback_funcs_for_metrics(self, message: Message):
         """
