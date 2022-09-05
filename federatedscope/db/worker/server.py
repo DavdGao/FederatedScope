@@ -90,7 +90,6 @@ class Server(Worker):
             id_superior = self.ID
             host_superior, port_superior = self.comm_manager.host, self.comm_manager.port
         content = {'ID': sender, 'ID_superior': id_superior, 'host_superior': host_superior, 'port_superior': port_superior}
-        logging.info("content {}".format(str(content)))
 
         self.comm_manager.send(
             Message(msg_type=HANDLER.ASSIGN_ID,
@@ -101,6 +100,7 @@ class Server(Worker):
     def callback_funcs_for_upload_data(self, message: Message):
         sender, data = message.sender, message.content
         tablepb = text_format.Parse(data, datapb.Table())
+        logging.info("Receive encoded table from {} with config {}.".format(sender, tablepb.config))
         table = Table.from_pb(tablepb)
         if self._cfg.processor.type == 'mda_processor':
             left_key = self.data_accessor.get_table().schema.primary()

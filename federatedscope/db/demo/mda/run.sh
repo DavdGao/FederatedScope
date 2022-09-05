@@ -14,7 +14,10 @@ then
   python federatedscope/db/main.py --cfg federatedscope/db/demo/mda/server.yaml data.root federatedscope/db/demo/mda/data/server.csv
 elif [ $1 == "client" ]
 then
-  if [ $# -ge 2 ]
+  if [ $2 == "mysql" ]
+  then
+    python federatedscope/db/main.py --cfg federatedscope/db/demo/mda/client_mysql.yaml
+  elif [ $# -ge 2 ]
   then
     python federatedscope/db/main.py --cfg federatedscope/db/demo/mda/client$2.yaml data.root federatedscope/db/demo/mda/data/client$2.csv
   else

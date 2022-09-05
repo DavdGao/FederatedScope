@@ -94,7 +94,9 @@ class Shuffler(Worker):
         sender, data = message.sender, message.content
         tablepb = text_format.Parse(data, datapb.Table())
         table = Table.from_pb(tablepb)
-        logger.info(f'Receive encoded table from Client {sender}.')
+        logger.info(f'Receive encoded table from Client {sender} with config {tablepb.config}.')
+        # todo: check consistency of config
+        self.config = tablepb.config
         if self.data_global is None:
             self.data_global = table
         else:
@@ -108,8 +110,10 @@ class Shuffler(Worker):
         """
         logger.info(f"Send encrypted data to the server with {self._cfg.processor}.")
         # todo: serialize into bytes to reduce storage space usage
+        tablepb = self.data_global.to_pb()
+        tablepb.config = self.config
         self.comm_manager.send(
             Message(msg_type=HANDLER.UPLOAD_DATA,
                     sender=self.ID,
                     receiver=[self.server_id],
-                    content=str(self.data_global.to_pb())))
+                    content=str(tablepb)))
