@@ -41,3 +41,10 @@ class LIFECYCLE:
     EPOCH = 'epoch'
     BATCH = 'batch'
     NONE = None
+
+
+class PROTOCOL:
+    NUM_SAMPLE = 'NUM_SAMPLE'
+    GRAD_CLIP = 'GRAD_CLIP'
+    BATCH_SIZE = 'BATCH_SIZE'
+    LOCAL_UPDATE_STEPS = 'LOCAL_UPDATE_STEPS'

@@ -12,6 +12,7 @@ from federatedscope.core.auxiliaries.trainer_builder import get_trainer
 from federatedscope.core.secret_sharing import AdditiveSecretSharing
 from federatedscope.core.auxiliaries.utils import merge_dict, \
     calculate_time_cost
+from federatedscope.core.auxiliaries.enums import PROTOCOL
 
 logger = logging.getLogger(__name__)
 
@@ -185,6 +186,8 @@ class Client(Worker):
         self.register_handlers('evaluate', self.callback_funcs_for_evaluate)
         self.register_handlers('finish', self.callback_funcs_for_finish)
         self.register_handlers('converged', self.callback_funcs_for_converged)
+        self.register_handlers('consult_request', self.callback_funcs_for_consult_request)
+        self.register_handlers('consult_receive', self.callback_funcs_for_consult_receive)
 
     def join_in(self):
         """
@@ -534,3 +537,32 @@ class Client(Worker):
         """
 
         self._monitor.global_converged()
+
+    def callback_funcs_for_consult_request(self, message: Message):
+        sender, content = message.sender, message.content
+
+        info_dict = dict()
+        for info in content:
+            # TODO: more elegant
+            if info == PROTOCOL.NUM_SAMPLE:
+                info_dict[info] = len(self.data['train'])
+            elif info == PROTOCOL.BATCH_SIZE:
+                info_dict[info] = self._cfg.data.batch_size
+            elif info == PROTOCOL.GRAD_CLIP:
+                info_dict[info] = self._cfg.grad.grad_clip
+            elif info == PROTOCOL.LOCAL_UPDATE_STEPS:
+                info_dict[info] = self._cfg.train.local_update_steps
+            else:
+                raise NotImplementedError(f"Information {info} not support.")
+
+        self.comm_manager.send(Message(
+            msg_type='consult_receive',
+            sender=self.ID,
+            receiver=[self.server_id],
+            content=info_dict
+        ))
+
+
+    def callback_funcs_for_consult_receive(self, message: Message):
+        pass
+

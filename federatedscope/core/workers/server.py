@@ -223,6 +223,9 @@ class Server(Worker):
         self.register_handlers('join_in_info', self.callback_funcs_for_join_in)
         self.register_handlers('model_para', self.callback_funcs_model_para)
         self.register_handlers('metrics', self.callback_funcs_for_metrics)
+        self.register_handlers('consult_request', self.callback_funcs_for_consult_request)
+        self.register_handlers('consult_receive', self.callback_funcs_for_consult_receive)
+        self.register_handlers('consult_end', self.callback_funcs_for_consult_end)
 
     def run(self):
         """
@@ -342,9 +345,12 @@ class Server(Worker):
                                 'evaluation.')
                     self.eval()
 
-            else:
+            elif buffer_type == MSGBUFFER.EVAL:
                 # Receiving enough feedback in the evaluation process
                 self._merge_and_format_eval_results()
+
+            elif buffer_type == MSGBUFFER.CONSULT:
+                self.trigger_for_train()
 
         else:
             move_on_flag = False
@@ -750,7 +756,23 @@ class Server(Worker):
         else:
             return self.join_in_client_num == self.client_num
 
-    def trigger_for_start(self):
+    def trigger_for_consult(self):
+        """To start the consultation if activated
+
+        """
+        if self._cfg.consult.use:
+            # Send request to clients if certain information is required
+            if len(self._cfg.consult.info_request_by_server) > 0:
+                self.comm_manager.send(Message(
+                    msg_type='consult_request',
+                    sender=self.ID,
+                    receiver=list(self.comm_manager.neighbors.keys()),
+                    content=self._cfg.consult.info_request_by_server
+                ))
+        else:
+            self.trigger_for_train()
+
+    def trigger_for_train(self):
         """
         To start the FL course when the expected number of clients have joined
         """
@@ -961,7 +983,7 @@ class Server(Worker):
                             timestamp=self.cur_timestamp,
                             content=self._cfg.federate.join_in_info.copy()))
 
-        self.trigger_for_start()
+        self.trigger_for_consult()
 
     def callback_funcs_for_metrics(self, message: Message):
         """
@@ -983,3 +1005,17 @@ class Server(Worker):
         self.msg_buffer[MSGBUFFER.EVAL][round][sender] = content
 
         return self.check_and_move_on(buffer_type=MSGBUFFER.EVAL)
+
+    def callback_funcs_for_consult_receive(self, message: Message):
+        sender, content = message.sender, message.content
+        # TODO: manage the collect info in next pr
+        self.msg_buffer[MSGBUFFER.CONSULT][round][sender] = content
+
+        min_received_num = len(self.comm_manager.get_neighbors().keys())
+        self.check_and_move_on(buffer_type=MSGBUFFER.CONSULT, min_received_num=min_received_num)
+
+    def callback_funcs_for_consult_request(self, message: Message):
+        pass
+
+    def callback_funcs_for_consult_end(self, message: Message):
+        pass
