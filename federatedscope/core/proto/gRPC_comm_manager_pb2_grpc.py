@@ -8,6 +8,7 @@ from federatedscope.core.proto import gRPC_comm_manager_pb2 \
 
 class gRPCComServeFuncStub(object):
     """Missing associated documentation comment in .proto file."""
+
     def __init__(self, channel):
         """Constructor.
 
@@ -15,16 +16,15 @@ class gRPCComServeFuncStub(object):
             channel: A grpc.Channel.
         """
         self.sendMessage = channel.unary_unary(
-            '/gRPCComServeFunc/sendMessage',
-            request_serializer=gRPC__comm__manager__pb2.MessageRequest.
-            SerializeToString,
-            response_deserializer=gRPC__comm__manager__pb2.MessageResponse.
-            FromString,
-        )
+                '/fscomm.gRPCComServeFunc/sendMessage',
+                request_serializer=gRPC__comm__manager__pb2.MessageRequest.SerializeToString,
+                response_deserializer=gRPC__comm__manager__pb2.MessageResponse.FromString,
+                )
 
 
 class gRPCComServeFuncServicer(object):
     """Missing associated documentation comment in .proto file."""
+
     def sendMessage(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -34,36 +34,34 @@ class gRPCComServeFuncServicer(object):
 
 def add_gRPCComServeFuncServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        'sendMessage': grpc.unary_unary_rpc_method_handler(
-            servicer.sendMessage,
-            request_deserializer=gRPC__comm__manager__pb2.MessageRequest.
-            FromString,
-            response_serializer=gRPC__comm__manager__pb2.MessageResponse.
-            SerializeToString,
-        ),
+            'sendMessage': grpc.unary_unary_rpc_method_handler(
+                    servicer.sendMessage,
+                    request_deserializer=gRPC__comm__manager__pb2.MessageRequest.FromString,
+                    response_serializer=gRPC__comm__manager__pb2.MessageResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        'gRPCComServeFunc', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler, ))
+            'fscomm.gRPCComServeFunc', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class gRPCComServeFunc(object):
     """Missing associated documentation comment in .proto file."""
+
     @staticmethod
     def sendMessage(request,
-                    target,
-                    options=(),
-                    channel_credentials=None,
-                    call_credentials=None,
-                    insecure=False,
-                    compression=None,
-                    wait_for_ready=None,
-                    timeout=None,
-                    metadata=None):
-        return grpc.experimental.unary_unary(
-            request, target, '/gRPCComServeFunc/sendMessage',
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/fscomm.gRPCComServeFunc/sendMessage',
             gRPC__comm__manager__pb2.MessageRequest.SerializeToString,
-            gRPC__comm__manager__pb2.MessageResponse.FromString, options,
-            channel_credentials, insecure, call_credentials, compression,
-            wait_for_ready, timeout, metadata)
+            gRPC__comm__manager__pb2.MessageResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
