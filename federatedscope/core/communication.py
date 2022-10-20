@@ -84,6 +84,7 @@ class gRPCCommManager(object):
         return server
 
     def add_neighbors(self, neighbor_id, address):
+        print(f"Get new neighbor {neighbor_id}({address})!")
         if isinstance(address, dict):
             self.neighbors[neighbor_id] = '{}:{}'.format(
                 address['host'], address['port'])
@@ -117,7 +118,7 @@ class gRPCCommManager(object):
                                                       0), ))
             stub = gRPC_comm_manager_pb2_grpc.gRPCComServeFuncStub(channel)
             return stub, channel
-
+        print(f"Send Message {message.msg_type}!!!")
         stub, channel = _create_stub(receiver_address)
         request = message.transform(to_list=True)
         try:
@@ -144,4 +145,5 @@ class gRPCCommManager(object):
         received_msg = self.server_funcs.receive()
         message = Message()
         message.parse(received_msg.msg)
+        print(f'Receiving message {message.msg_type}!!!')
         return message
